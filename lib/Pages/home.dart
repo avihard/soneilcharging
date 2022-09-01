@@ -131,7 +131,8 @@ class _batteryWidgetState extends State<batteryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return SafeArea(
+        child: Column(
       children: [
         Stack(
           clipBehavior: Clip.none,
@@ -181,7 +182,7 @@ class _batteryWidgetState extends State<batteryWidget> {
           ],
         ),
       ],
-    );
+    ));
   }
 }
 

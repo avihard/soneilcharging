@@ -27,23 +27,25 @@ class myProfileWidget extends StatelessWidget {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text(
-              "Schedule Charging",
-              style: headerText,
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            stopChargingButton(),
-            const Divider(
-              thickness: 1,
-              height: 30,
-              color: Colors.white,
-            ),
-            const chargeSettingWidget()
-          ],
+        child: SafeArea(
+          child: Column(
+            children: [
+              Text(
+                "Schedule Charging",
+                style: headerText,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              stopChargingButton(),
+              const Divider(
+                thickness: 1,
+                height: 30,
+                color: Colors.white,
+              ),
+              const chargeSettingWidget()
+            ],
+          ),
         ),
       ),
     );
@@ -112,7 +114,6 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget> {
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10), color: Colors.white),
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height * 0.35,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -258,9 +259,12 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget> {
               InkWell(
                 onTap: () => {
                   showModalBottomSheet(
+                      isScrollControlled: true,
                       context: context,
                       builder: (context) {
-                        return editChargeSetting();
+                        return Wrap(
+                          children: [editChargeSetting()],
+                        );
                       }),
                 },
                 child: const Text(
@@ -290,6 +294,7 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget> {
             height: 20,
           ),
           chargeSettingRow("Max Charge", maxCharging.toString()),
+          /* for wifi enable and disable*/
           /* RaisedButton(
             child: Text("Enable"),
             onPressed: () {
