@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:soneilcharging/Pages/settings.dart';
 
 // functional widgets
 import 'Pages/home.dart';
@@ -96,7 +97,8 @@ class _indexWidgetState extends State<indexWidget> {
             ),
           ),
           myProfileWidget(),
-          scheduleWidget()
+          scheduleWidget(),
+          settingWidget()
         ],
       ),
       /* floatingActionButton: FloatingActionButton(

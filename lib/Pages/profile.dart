@@ -308,7 +308,7 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget> {
                 textAlign: TextAlign.start,
               ),
               Switch(
-                activeColor: Colors.green,
+                activeColor: Colors.blue.shade800,
                 value: isAutoStart,
                 onChanged: (value) => {
                   setState(
@@ -319,7 +319,7 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget> {
             ],
           ),
           const Text(
-            "Enabling Autostart will start the charging as soon as you plug charger to the car.",
+            "Enabling Autostart will start the charging as soon as you plug the charger to the car.",
             style: TextStyle(color: Colors.grey),
           )
           /* for wifi enable and disable*/

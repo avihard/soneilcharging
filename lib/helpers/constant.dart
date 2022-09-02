@@ -47,7 +47,8 @@ TextStyle tableTitle = const TextStyle(
     color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20.0);
 
 // for normal regular texts
-TextStyle normalTexts = const TextStyle(color: Colors.black, fontSize: 24.0);
+TextStyle normalTexts = const TextStyle(color: Colors.white, fontSize: 20.0);
+TextStyle smallTexts = const TextStyle(color: Colors.white, fontSize: 16.0);
 
 // setting page Texts
 TextStyle settingText = const TextStyle(
