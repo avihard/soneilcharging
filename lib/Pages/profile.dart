@@ -1,8 +1,8 @@
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../helpers/constant.dart';
-import 'package:wifi_iot/wifi_iot.dart';
 
 class myProfileWidget extends StatelessWidget {
   const myProfileWidget({Key? key}) : super(key: key);
@@ -31,7 +31,7 @@ class myProfileWidget extends StatelessWidget {
           child: Column(
             children: [
               Text(
-                "Schedule Charging",
+                "Configuration",
                 style: headerText,
               ),
               const SizedBox(
@@ -62,6 +62,8 @@ class chargeSettingWidget extends StatefulWidget {
 class _chargeSettingWidgetState extends State<chargeSettingWidget> {
   int currentValue = 32;
   int maxCharging = 100;
+
+  bool isAutoStart = true;
 
   Widget modalButtons(updateValues) {
     return Row(
@@ -294,6 +296,32 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget> {
             height: 20,
           ),
           chargeSettingRow("Max Charge", maxCharging.toString()),
+          SizedBox(
+            height: 30,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "AutoStart",
+                style: tableTitle,
+                textAlign: TextAlign.start,
+              ),
+              Switch(
+                activeColor: Colors.green,
+                value: isAutoStart,
+                onChanged: (value) => {
+                  setState(
+                    () => {isAutoStart = value},
+                  ),
+                },
+              ),
+            ],
+          ),
+          const Text(
+            "Enabling Autostart will start the charging as soon as you plug charger to the car.",
+            style: TextStyle(color: Colors.grey),
+          )
           /* for wifi enable and disable*/
           /* RaisedButton(
             child: Text("Enable"),

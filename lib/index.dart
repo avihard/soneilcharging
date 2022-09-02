@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 // functional widgets
 import 'Pages/home.dart';
 import 'Pages/profile.dart';
+import 'Pages/schedule.dart';
 import 'functions/chargerData.dart';
 
 // welcome page
@@ -61,13 +62,13 @@ class _indexWidgetState extends State<indexWidget> {
             backgroundColor: Colors.black,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.business),
-            label: 'Business',
+            icon: Icon(Icons.settings),
+            label: 'Configuration',
             backgroundColor: Colors.black,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.school),
-            label: 'School',
+            icon: Icon(Icons.schedule),
+            label: 'Schedule',
             backgroundColor: Colors.black,
           ),
           BottomNavigationBarItem(
@@ -94,7 +95,8 @@ class _indexWidgetState extends State<indexWidget> {
               curve: Curves.linear,
             ),
           ),
-          myProfileWidget()
+          myProfileWidget(),
+          scheduleWidget()
         ],
       ),
       /* floatingActionButton: FloatingActionButton(
