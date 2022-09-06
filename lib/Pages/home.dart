@@ -104,7 +104,12 @@ class _batteryWidgetState extends State<batteryWidget> {
 
         return Column(
           children: [
-            Icon(Icons.battery_full, size: size, color: color),
+            Stack(
+              children: [
+                Icon(Icons.battery_charging_full_sharp,
+                    size: size, color: color),
+              ],
+            ),
             Text('Full!', style: style.copyWith(color: color)),
           ],
         );
@@ -131,7 +136,8 @@ class _batteryWidgetState extends State<batteryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return SafeArea(
+        child: Column(
       children: [
         Stack(
           clipBehavior: Clip.none,
@@ -151,8 +157,9 @@ class _batteryWidgetState extends State<batteryWidget> {
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
                   children: [
-                    const Text(
+                    Text(
                       "EV Charger",
+                      style: headerText,
                     ),
                     buildBatteryState(batteryState),
                     const SizedBox(height: 32),
@@ -181,7 +188,7 @@ class _batteryWidgetState extends State<batteryWidget> {
           ],
         ),
       ],
-    );
+    ));
   }
 }
 

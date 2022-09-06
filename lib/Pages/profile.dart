@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../helpers/constant.dart';
-import 'package:wifi_iot/wifi_iot.dart';
 
 class myProfileWidget extends StatelessWidget {
-  const myProfileWidget({Key? key}) : super(key: key);
+  final GlobalKey<_chargeSettingWidgetState> _myWidgetState =
+      GlobalKey<_chargeSettingWidgetState>();
+  myProfileWidget({Key? key}) : super(key: key);
 
   Widget stopChargingButton() {
     return ElevatedButton(
@@ -22,28 +24,51 @@ class myProfileWidget extends StatelessWidget {
     );
   }
 
+  Widget resetChargingButton() {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        primary: Colors.blue.shade800,
+        minimumSize: const Size.fromHeight(50), // NEW
+        elevation: 10,
+      ),
+      onPressed: () {
+        _myWidgetState.currentState?.resetSettings();
+      },
+      child: const Text(
+        'Reset to Default',
+        style: TextStyle(fontSize: 16),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text(
-              "Schedule Charging",
-              style: headerText,
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            stopChargingButton(),
-            const Divider(
-              thickness: 1,
-              height: 30,
-              color: Colors.white,
-            ),
-            const chargeSettingWidget()
-          ],
+        child: SafeArea(
+          child: Column(
+            children: [
+              Text(
+                "Configuration",
+                style: headerText,
+              ),
+              const SizedBox(
+                height: 20,
+              ),
+              stopChargingButton(),
+              const Divider(
+                thickness: 1,
+                height: 30,
+                color: Colors.white,
+              ),
+              chargeSettingWidget(key: _myWidgetState),
+              const SizedBox(
+                height: 20,
+              ),
+              resetChargingButton(),
+            ],
+          ),
         ),
       ),
     );
@@ -57,9 +82,31 @@ class chargeSettingWidget extends StatefulWidget {
   State<chargeSettingWidget> createState() => _chargeSettingWidgetState();
 }
 
-class _chargeSettingWidgetState extends State<chargeSettingWidget> {
-  int currentValue = 32;
-  int maxCharging = 100;
+class _chargeSettingWidgetState extends State<chargeSettingWidget>
+    with AutomaticKeepAliveClientMixin<chargeSettingWidget> {
+  @override
+  bool get wantKeepAlive => true;
+
+  late int currentValue;
+  late int maxCharging;
+
+  bool isAutoStart = true;
+
+  // this funtion resets the settings
+  void resetSettings() {
+    setState(() {
+      currentValue = 32;
+      maxCharging = 100;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    currentValue = 32;
+    maxCharging = 100;
+  }
 
   Widget modalButtons(updateValues) {
     return Row(
@@ -112,7 +159,6 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget> {
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10), color: Colors.white),
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height * 0.35,
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -243,6 +289,7 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Padding(
       padding: const EdgeInsets.only(top: 20),
       child: Column(
@@ -258,9 +305,12 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget> {
               InkWell(
                 onTap: () => {
                   showModalBottomSheet(
+                      isScrollControlled: true,
                       context: context,
                       builder: (context) {
-                        return editChargeSetting();
+                        return Wrap(
+                          children: [editChargeSetting()],
+                        );
                       }),
                 },
                 child: const Text(
@@ -290,6 +340,33 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget> {
             height: 20,
           ),
           chargeSettingRow("Max Charge", maxCharging.toString()),
+          SizedBox(
+            height: 30,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "AutoStart",
+                style: tableTitle,
+                textAlign: TextAlign.start,
+              ),
+              Switch(
+                activeColor: Colors.blue.shade800,
+                value: isAutoStart,
+                onChanged: (value) => {
+                  setState(
+                    () => {isAutoStart = value},
+                  ),
+                },
+              ),
+            ],
+          ),
+          const Text(
+            "Enabling Autostart will start the charging as soon as you plug the charger to the car.",
+            style: TextStyle(color: Colors.grey),
+          )
+          /* for wifi enable and disable*/
           /* RaisedButton(
             child: Text("Enable"),
             onPressed: () {
