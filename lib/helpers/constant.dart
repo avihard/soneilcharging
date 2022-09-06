@@ -41,14 +41,19 @@ ThemeData mainTheme = ThemeData(
 );
 
 TextStyle headerText = const TextStyle(
-    color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24.0);
+    color: Colors.white,
+    fontWeight: FontWeight.bold,
+    fontSize: 24.0,
+    fontFamily: 'Rubik');
 
 TextStyle tableTitle = const TextStyle(
     color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20.0);
 
 // for normal regular texts
-TextStyle normalTexts = const TextStyle(color: Colors.white, fontSize: 20.0);
-TextStyle smallTexts = const TextStyle(color: Colors.white, fontSize: 16.0);
+TextStyle normalTexts =
+    const TextStyle(color: Colors.white, fontSize: 20.0, fontFamily: 'Rubik');
+TextStyle smallTexts =
+    const TextStyle(color: Colors.white, fontSize: 16.0, fontFamily: 'Rubik');
 
 // setting page Texts
 TextStyle settingText = const TextStyle(

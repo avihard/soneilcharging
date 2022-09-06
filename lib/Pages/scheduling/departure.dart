@@ -87,12 +87,15 @@ class _departureWidgetState extends State<departureWidget>
                             focusElevation: 10.0,
                             elevation: 10,
                             backgroundColor: Colors.blue.shade800,
-                            child: Icon(Icons.add),
+                            child: Icon(
+                              Icons.add,
+                              color: Colors.white,
+                            ),
                             onPressed: (() => setState(() {
                                   isAdded = false;
                                 }))),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 40,
                       ),
                       Text(
@@ -305,6 +308,18 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
     );
   }
 
+  void _selectTime(index) async {
+    final TimeOfDay? newTime = await showTimePicker(
+      context: context,
+      initialTime: widget.setTimes[index]['time'],
+    );
+    if (newTime != null) {
+      setState(() {
+        widget.setTimes[index]['time'] = newTime;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.setTimes.isEmpty) {
@@ -361,6 +376,9 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
                 key: Key(widget.setTimes[index]['id'].toString()),
                 title: Text(widget.setTimes[index]['label']),
                 trailing: Text(widget.setTimes[index]['time'].format(context)),
+                onExpansionChanged: (value) {
+                  return value ? _selectTime(index) : null;
+                },
                 children: [
                   Wrap(
                       alignment: WrapAlignment.center,

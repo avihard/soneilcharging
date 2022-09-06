@@ -61,15 +61,20 @@ class timeSectionWidget extends StatelessWidget {
     return Column(
       children: [
         InkWell(
-          child: Card(
-            elevation: 5,
+          child: Container(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Departure Time"),
-                  Icon(Icons.arrow_forward_ios_sharp)
+                  Text(
+                    "Departure Time",
+                    style: smallTexts,
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios_sharp,
+                    size: 16.0,
+                  )
                 ],
               ),
             ),
