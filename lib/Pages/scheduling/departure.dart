@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
+import '../../helpers/constant.dart';
 
-import '../helpers/constant.dart';
-import 'package:intl/intl.dart';
-
-class scheduleWidget extends StatefulWidget {
-  const scheduleWidget({Key? key}) : super(key: key);
+class departureWidget extends StatefulWidget {
+  const departureWidget({Key? key}) : super(key: key);
 
   @override
-  State<scheduleWidget> createState() => _scheduleWidgetState();
+  State<departureWidget> createState() => _departureWidgetState();
 }
 
-class _scheduleWidgetState extends State<scheduleWidget>
-    with AutomaticKeepAliveClientMixin<scheduleWidget> {
+class _departureWidgetState extends State<departureWidget>
+    with AutomaticKeepAliveClientMixin<departureWidget> {
   @override
   bool get wantKeepAlive => true;
 
@@ -43,19 +41,39 @@ class _scheduleWidgetState extends State<scheduleWidget>
     });
   }
 
+  void deleteElement(id) {
+    setState(() {
+      setTimes.removeWhere((element) => element['id'] == id);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
     return SafeArea(
-      child: SingleChildScrollView(
+        child: Scaffold(
+      body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(10.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Schedule Charging",
-                style: headerText,
+              Row(
+                children: [
+                  InkWell(
+                    hoverColor: Colors.blue,
+                    focusColor: Colors.blue,
+                    child: const Icon(
+                      Icons.keyboard_arrow_left,
+                      size: 32,
+                    ),
+                    onTap: () => {Navigator.pop(context)},
+                  ),
+                  Text(
+                    "Schedule Charging",
+                    style: headerText,
+                  ),
+                ],
               ),
               if (!isAdded) scheduleConfig(notifyParent: departList),
               if (isAdded)
@@ -88,12 +106,14 @@ class _scheduleWidgetState extends State<scheduleWidget>
                 height: 20,
               ),
               setDepartureWidget(
-                  setTimes: setTimes, notifyParent: clearDepartList)
+                  setTimes: setTimes,
+                  notifyParent: clearDepartList,
+                  deleteElement: deleteElement)
             ],
           ),
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -222,6 +242,7 @@ class _scheduleConfigState extends State<scheduleConfig> {
                       onPressed: () => {
                             // format the data and pass it to parent.
                             currentTime.addAll({
+                              'id': UniqueKey().hashCode,
                               'time': _time,
                               'selectedDays': _selectedIndexs,
                               'label': depLabel.text.isNotEmpty
@@ -245,8 +266,12 @@ class _scheduleConfigState extends State<scheduleConfig> {
 class setDepartureWidget extends StatefulWidget {
   final List setTimes;
   final Function() notifyParent;
+  final Function(dynamic) deleteElement;
   const setDepartureWidget(
-      {Key? key, required this.setTimes, required this.notifyParent})
+      {Key? key,
+      required this.setTimes,
+      required this.notifyParent,
+      required this.deleteElement})
       : super(key: key);
 
   @override
@@ -319,9 +344,12 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
               )
             ],
           ),
-          Divider(
-            height: 20,
-            color: Colors.blue.shade800,
+          const Padding(
+            padding: EdgeInsets.only(top: 5, bottom: 5),
+            child: Text(
+              "This shows all the departure time you have set till now.",
+              style: TextStyle(color: Colors.grey),
+            ),
           ),
           ListView.builder(
             scrollDirection: Axis.vertical,
@@ -330,6 +358,7 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
             itemCount: widget.setTimes.length,
             itemBuilder: (BuildContext context, int index) {
               return ExpansionTile(
+                key: Key(widget.setTimes[index]['id'].toString()),
                 title: Text(widget.setTimes[index]['label']),
                 trailing: Text(widget.setTimes[index]['time'].format(context)),
                 children: [
@@ -341,8 +370,26 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
                           weekCheckboxes(elem)
                       ]),
                   const SizedBox(
-                    height: 10,
+                    height: 5,
                   ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          // here we will call API to save the data
+                          print(widget.setTimes[index]['id']);
+                        },
+                        child: const Text("Save"),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {
+                          widget.deleteElement(widget.setTimes[index]['id']);
+                        },
+                        child: const Text("Delete"),
+                      ),
+                    ],
+                  )
                   /* Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,

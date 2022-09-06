@@ -4,7 +4,7 @@ import 'package:soneilcharging/Pages/settings.dart';
 // functional widgets
 import 'Pages/home.dart';
 import 'Pages/profile.dart';
-import 'Pages/schedule.dart';
+import 'Pages/scheduling/schedule.dart';
 import 'functions/chargerData.dart';
 
 // welcome page

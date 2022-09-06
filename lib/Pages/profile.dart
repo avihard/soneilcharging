@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import '../helpers/constant.dart';
 
 class myProfileWidget extends StatelessWidget {
-  const myProfileWidget({Key? key}) : super(key: key);
+  final GlobalKey<_chargeSettingWidgetState> _myWidgetState =
+      GlobalKey<_chargeSettingWidgetState>();
+  myProfileWidget({Key? key}) : super(key: key);
 
   Widget stopChargingButton() {
     return ElevatedButton(
@@ -17,6 +19,23 @@ class myProfileWidget extends StatelessWidget {
       onPressed: () {},
       child: const Text(
         'STOP CHARGING',
+        style: TextStyle(fontSize: 16),
+      ),
+    );
+  }
+
+  Widget resetChargingButton() {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        primary: Colors.blue.shade800,
+        minimumSize: const Size.fromHeight(50), // NEW
+        elevation: 10,
+      ),
+      onPressed: () {
+        _myWidgetState.currentState?.resetSettings();
+      },
+      child: const Text(
+        'Reset to Default',
         style: TextStyle(fontSize: 16),
       ),
     );
@@ -43,7 +62,11 @@ class myProfileWidget extends StatelessWidget {
                 height: 30,
                 color: Colors.white,
               ),
-              const chargeSettingWidget()
+              chargeSettingWidget(key: _myWidgetState),
+              const SizedBox(
+                height: 20,
+              ),
+              resetChargingButton(),
             ],
           ),
         ),
@@ -59,11 +82,31 @@ class chargeSettingWidget extends StatefulWidget {
   State<chargeSettingWidget> createState() => _chargeSettingWidgetState();
 }
 
-class _chargeSettingWidgetState extends State<chargeSettingWidget> {
-  int currentValue = 32;
-  int maxCharging = 100;
+class _chargeSettingWidgetState extends State<chargeSettingWidget>
+    with AutomaticKeepAliveClientMixin<chargeSettingWidget> {
+  @override
+  bool get wantKeepAlive => true;
+
+  late int currentValue;
+  late int maxCharging;
 
   bool isAutoStart = true;
+
+  // this funtion resets the settings
+  void resetSettings() {
+    setState(() {
+      currentValue = 32;
+      maxCharging = 100;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    currentValue = 32;
+    maxCharging = 100;
+  }
 
   Widget modalButtons(updateValues) {
     return Row(
@@ -246,6 +289,7 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Padding(
       padding: const EdgeInsets.only(top: 20),
       child: Column(
