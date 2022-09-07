@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class settingWidget extends StatefulWidget {
   const settingWidget({Key? key}) : super(key: key);
@@ -13,37 +14,45 @@ class _settingWidgetState extends State<settingWidget> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Stack(
             clipBehavior: Clip.none,
             children: [
               Container(
-                height: 100,
+                height: 150,
                 width: double.infinity,
-                color: Colors.blue.shade800,
-              ),
-              Positioned(
-                top: 20,
-                child: Row(
-                  children: const [
-                    CircleAvatar(
-                      radius: 144 / 2,
-                      backgroundColor: Colors.grey,
-                      backgroundImage: NetworkImage(
-                          "https://static.vecteezy.com/system/resources/previews/002/002/403/non_2x/man-with-beard-avatar-character-isolated-icon-free-vector.jpg"),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      "Username",
-                      style: TextStyle(
-                          fontSize: 20.0, fontWeight: FontWeight.bold),
-                    )
-                  ],
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade800,
+                  borderRadius: BorderRadius.vertical(
+                      bottom: Radius.elliptical(
+                          MediaQuery.of(context).size.width, 100.0)),
                 ),
               ),
+              Positioned(
+                  top: 80,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Column(
+                      children: const [
+                        CircleAvatar(
+                          radius: 144 / 2,
+                          backgroundColor: Colors.grey,
+                          backgroundImage: NetworkImage(
+                              "https://static.vecteezy.com/system/resources/previews/002/002/403/non_2x/man-with-beard-avatar-character-isolated-icon-free-vector.jpg"),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          "Jeet",
+                          style: TextStyle(
+                              fontSize: 20.0, fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
+                  )),
             ],
           ),
           /* Text(counter.toString()),
@@ -96,5 +105,31 @@ class _directtomeState extends State<directtome> {
         ],
       ),
     ));
+  }
+}
+
+class CurvedPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    var paint = Paint()
+      ..color = Colors.teal
+      ..strokeWidth = 15;
+
+    var path = Path();
+
+    path.moveTo(0, size.height * 0.7);
+    path.quadraticBezierTo(size.width * 0.25, size.height * 0.7,
+        size.width * 0.5, size.height * 0.8);
+    path.quadraticBezierTo(size.width * 0.75, size.height * 0.9,
+        size.width * 1.0, size.height * 0.8);
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
   }
 }

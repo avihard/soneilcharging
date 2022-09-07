@@ -48,6 +48,7 @@ class myProfileWidget extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: SafeArea(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 "Configuration",
@@ -66,7 +67,10 @@ class myProfileWidget extends StatelessWidget {
               const SizedBox(
                 height: 20,
               ),
-              resetChargingButton(),
+              Align(
+                alignment: FractionalOffset.bottomCenter,
+                child: resetChargingButton(),
+              ),
             ],
           ),
         ),
