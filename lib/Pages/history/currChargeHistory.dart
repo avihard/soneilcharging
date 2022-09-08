@@ -38,11 +38,12 @@ class _currChargeHistoryWidgetState extends State<currChargeHistoryWidget> {
                       style: headerText,
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(
-                      height: 20,
-                    ),
                   ],
                 ),
+                const SizedBox(
+                  height: 20,
+                ),
+                chargingStatusWidget()
               ],
             ),
           ),
@@ -62,6 +63,135 @@ class chargingStatusWidget extends StatefulWidget {
 class _chargingStatusWidgetState extends State<chargingStatusWidget> {
   @override
   Widget build(BuildContext context) {
-    return const Text("heyy");
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Container(
+            height: 80,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(color: Colors.white),
+            child: IntrinsicHeight(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Column(
+                    children: [
+                      const Text(
+                        "Charge Limit",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      Text(
+                        "100%",
+                        style: modelSubHeader,
+                      )
+                    ],
+                  ),
+                  const VerticalDivider(
+                    color: Colors.black54,
+                    thickness: 2,
+                  ),
+                  Column(
+                    children: [
+                      const Text(
+                        "Estimated",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      Text(
+                        "20:56",
+                        style: modelSubHeader,
+                      )
+                    ],
+                  ),
+                ],
+              ),
+            )),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8, top: 32),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.ev_station_sharp,
+                color: Colors.white,
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Column(
+                children: [
+                  Text(
+                    "Plugged in",
+                    style: modelText,
+                  ),
+                  const Text(
+                    "90% / 100mh",
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  )
+                ],
+              )
+            ],
+          ),
+        ),
+        const Align(
+            alignment: Alignment.center,
+            widthFactor: 5,
+            child: Icon(Icons.keyboard_double_arrow_down)),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8, top: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.control_point,
+                color: Colors.white,
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Text(
+                "Chaging Started",
+                style: modelText,
+              )
+            ],
+          ),
+        ),
+        const Align(
+            alignment: Alignment.center,
+            widthFactor: 5,
+            child: Icon(Icons.keyboard_double_arrow_down)),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8, top: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.charging_station,
+                color: Colors.white,
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Text(
+                "Charging...",
+                style: modelText,
+              )
+            ],
+          ),
+        ),
+        const Align(
+            alignment: Alignment.center,
+            widthFactor: 5,
+            child: Icon(Icons.keyboard_double_arrow_down)),
+        const Padding(
+          padding: const EdgeInsets.only(bottom: 8, top: 8),
+          child: Text(
+            'Target',
+            style: TextStyle(color: Colors.grey, fontSize: 16.0),
+          ),
+        ),
+      ],
+    );
   }
 }

@@ -64,6 +64,7 @@ TextStyle modelHeader = const TextStyle(
     color: Colors.black45, fontWeight: FontWeight.bold, fontSize: 24.0);
 
 TextStyle modelSubHeader = const TextStyle(
-    color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16.0);
+    color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20.0);
 
-TextStyle modelText = const TextStyle(color: Colors.black, fontSize: 16.0);
+TextStyle modelText = const TextStyle(
+    color: Colors.white, fontSize: 16.0, fontWeight: FontWeight.bold);

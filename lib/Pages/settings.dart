@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import '../helpers/utils.dart';
 
 class settingWidget extends StatefulWidget {
   const settingWidget({Key? key}) : super(key: key);
@@ -14,7 +14,6 @@ class _settingWidgetState extends State<settingWidget> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Stack(
             clipBehavior: Clip.none,
@@ -43,7 +42,7 @@ class _settingWidgetState extends State<settingWidget> {
                               "https://static.vecteezy.com/system/resources/previews/002/002/403/non_2x/man-with-beard-avatar-character-isolated-icon-free-vector.jpg"),
                         ),
                         SizedBox(
-                          width: 10,
+                          height: 10,
                         ),
                         Text(
                           "Jeet",
@@ -55,6 +54,10 @@ class _settingWidgetState extends State<settingWidget> {
                   )),
             ],
           ),
+          SizedBox(
+            height: 20,
+          ),
+          Align(heightFactor: 5, child: personalInfoWidget())
           /* Text(counter.toString()),
           ElevatedButton(
               child: const Text("Press me"),
@@ -67,6 +70,31 @@ class _settingWidgetState extends State<settingWidget> {
                   }), */
         ],
       ),
+    );
+  }
+}
+
+class personalInfoWidget extends StatefulWidget {
+  const personalInfoWidget({Key? key}) : super(key: key);
+
+  @override
+  State<personalInfoWidget> createState() => _personalInfoWidgetState();
+}
+
+class _personalInfoWidgetState extends State<personalInfoWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ElevatedButton(
+            onPressed: () => {
+                  setLoginStatus(false),
+                  Navigator.of(context).popUntil((route) => false),
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/login', (Route<dynamic> route) => false)
+                },
+            child: const Text("LOGOUT"))
+      ],
     );
   }
 }
@@ -105,31 +133,5 @@ class _directtomeState extends State<directtome> {
         ],
       ),
     ));
-  }
-}
-
-class CurvedPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    var paint = Paint()
-      ..color = Colors.teal
-      ..strokeWidth = 15;
-
-    var path = Path();
-
-    path.moveTo(0, size.height * 0.7);
-    path.quadraticBezierTo(size.width * 0.25, size.height * 0.7,
-        size.width * 0.5, size.height * 0.8);
-    path.quadraticBezierTo(size.width * 0.75, size.height * 0.9,
-        size.width * 1.0, size.height * 0.8);
-    path.lineTo(size.width, size.height);
-    path.lineTo(0, size.height);
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return true;
   }
 }
