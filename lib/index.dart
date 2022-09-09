@@ -73,8 +73,8 @@ class _indexWidgetState extends State<indexWidget> {
             backgroundColor: Colors.black,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.theater_comedy),
+            label: 'Profile',
             backgroundColor: Colors.black,
           ),
         ],

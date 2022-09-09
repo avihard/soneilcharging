@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../helpers/utils.dart';
 
 class settingWidget extends StatefulWidget {
   const settingWidget({Key? key}) : super(key: key);
@@ -13,39 +14,50 @@ class _settingWidgetState extends State<settingWidget> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Stack(
             clipBehavior: Clip.none,
             children: [
               Container(
-                height: 100,
+                height: 150,
                 width: double.infinity,
-                color: Colors.blue.shade800,
-              ),
-              Positioned(
-                top: 20,
-                child: Row(
-                  children: const [
-                    CircleAvatar(
-                      radius: 144 / 2,
-                      backgroundColor: Colors.grey,
-                      backgroundImage: NetworkImage(
-                          "https://static.vecteezy.com/system/resources/previews/002/002/403/non_2x/man-with-beard-avatar-character-isolated-icon-free-vector.jpg"),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      "Username",
-                      style: TextStyle(
-                          fontSize: 20.0, fontWeight: FontWeight.bold),
-                    )
-                  ],
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade800,
+                  borderRadius: BorderRadius.vertical(
+                      bottom: Radius.elliptical(
+                          MediaQuery.of(context).size.width, 100.0)),
                 ),
               ),
+              Positioned(
+                  top: 80,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Column(
+                      children: const [
+                        CircleAvatar(
+                          radius: 144 / 2,
+                          backgroundColor: Colors.grey,
+                          backgroundImage: NetworkImage(
+                              "https://static.vecteezy.com/system/resources/previews/002/002/403/non_2x/man-with-beard-avatar-character-isolated-icon-free-vector.jpg"),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          "Jeet",
+                          style: TextStyle(
+                              fontSize: 20.0, fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
+                  )),
             ],
           ),
+          SizedBox(
+            height: 20,
+          ),
+          Align(heightFactor: 5, child: personalInfoWidget())
           /* Text(counter.toString()),
           ElevatedButton(
               child: const Text("Press me"),
@@ -58,6 +70,31 @@ class _settingWidgetState extends State<settingWidget> {
                   }), */
         ],
       ),
+    );
+  }
+}
+
+class personalInfoWidget extends StatefulWidget {
+  const personalInfoWidget({Key? key}) : super(key: key);
+
+  @override
+  State<personalInfoWidget> createState() => _personalInfoWidgetState();
+}
+
+class _personalInfoWidgetState extends State<personalInfoWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        ElevatedButton(
+            onPressed: () => {
+                  setLoginStatus(false),
+                  Navigator.of(context).popUntil((route) => false),
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/login', (Route<dynamic> route) => false)
+                },
+            child: const Text("LOGOUT"))
+      ],
     );
   }
 }

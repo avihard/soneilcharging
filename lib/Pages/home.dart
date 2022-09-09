@@ -8,6 +8,7 @@ import 'dart:async';
 import 'package:flutter_swiper/flutter_swiper.dart';
 
 import '../helpers/constant.dart';
+import 'history/currChargeHistory.dart';
 
 const dynamic informationObject = [
   {"title": "Current", "value": 32, "unit": "Ampere", "icons": Icons.volcano},
@@ -161,7 +162,16 @@ class _batteryWidgetState extends State<batteryWidget> {
                       "EV Charger",
                       style: headerText,
                     ),
-                    buildBatteryState(batteryState),
+                    InkWell(
+                      child: buildBatteryState(batteryState),
+                      onTap: () => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => currChargeHistoryWidget()),
+                        )
+                      },
+                    ),
                     const SizedBox(height: 32),
                     buildBatteryLevel(batteryLevel),
                   ],

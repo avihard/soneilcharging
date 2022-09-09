@@ -47,6 +47,12 @@ class _departureWidgetState extends State<departureWidget>
     });
   }
 
+  void saveElement(id) {
+    setState(() {
+      isAdded = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -99,7 +105,7 @@ class _departureWidgetState extends State<departureWidget>
                         width: 40,
                       ),
                       Text(
-                        "Add departure time.",
+                        "Add departure time1.",
                         style: normalTexts,
                       )
                     ],
@@ -111,7 +117,8 @@ class _departureWidgetState extends State<departureWidget>
               setDepartureWidget(
                   setTimes: setTimes,
                   notifyParent: clearDepartList,
-                  deleteElement: deleteElement)
+                  deleteElement: deleteElement,
+                  saveElement: saveElement)
             ],
           ),
         ),
@@ -270,11 +277,13 @@ class setDepartureWidget extends StatefulWidget {
   final List setTimes;
   final Function() notifyParent;
   final Function(dynamic) deleteElement;
+  final Function(dynamic) saveElement;
   const setDepartureWidget(
       {Key? key,
       required this.setTimes,
       required this.notifyParent,
-      required this.deleteElement})
+      required this.deleteElement,
+      required this.saveElement})
       : super(key: key);
 
   @override
@@ -282,6 +291,8 @@ class setDepartureWidget extends StatefulWidget {
 }
 
 class _setDepartureWidgetState extends State<setDepartureWidget> {
+  bool selected = false;
+
   Widget weekCheckboxes(elem) {
     return Container(
       width: 50,
@@ -373,10 +384,12 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
             itemCount: widget.setTimes.length,
             itemBuilder: (BuildContext context, int index) {
               return ExpansionTile(
-                key: Key(widget.setTimes[index]['id'].toString()),
+                initiallyExpanded: selected,
+                key: GlobalKey(),
                 title: Text(widget.setTimes[index]['label']),
                 trailing: Text(widget.setTimes[index]['time'].format(context)),
                 onExpansionChanged: (value) {
+                  selected = value;
                   return value ? _selectTime(index) : null;
                 },
                 children: [
@@ -395,8 +408,11 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
                     children: [
                       ElevatedButton(
                         onPressed: () {
+                          setState(() {
+                            selected = !selected;
+                          });
                           // here we will call API to save the data
-                          print(widget.setTimes[index]['id']);
+                          // widget.saveElement(widget.setTimes[index]['id']);
                         },
                         child: const Text("Save"),
                       ),
