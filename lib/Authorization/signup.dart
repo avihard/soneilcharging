@@ -1,39 +1,77 @@
 import 'package:soneilcharging/Authorization/login.dart';
 import 'package:flutter/material.dart';
+import '../helpers/utils.dart';
 
-class Signup extends StatelessWidget {
+class Signup extends StatefulWidget {
+  @override
+  State<Signup> createState() => _SignupState();
+}
+
+class _SignupState extends State<Signup> {
   final _formKey = GlobalKey<FormState>();
+
   final usernameController = TextEditingController();
+
   final emailController = TextEditingController();
+
   final passwordController = TextEditingController();
 
+  bool _isObscure = true;
+
   Widget userInput(TextEditingController userInput, String hintTitle,
-      TextInputType keyboardType) {
+      TextInputType keyboardType, IconData icon) {
     return Container(
       height: 55,
       margin: EdgeInsets.only(bottom: 15),
-      decoration: BoxDecoration(boxShadow: [
-        BoxShadow(
-          color: Colors.grey.withOpacity(0.5),
-          spreadRadius: 2,
-          blurRadius: 2,
-          offset: Offset(0, 2), // changes position of shadow
-        ),
-      ], color: Colors.white, borderRadius: BorderRadius.circular(30)),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+      ),
       child: Padding(
-        padding: const EdgeInsets.only(left: 25.0, top: 15, right: 25),
+        padding: const EdgeInsets.only(left: 15.0, top: 15),
         child: TextFormField(
           controller: userInput,
+          obscureText: hintTitle == "Password" ? _isObscure : false,
           autocorrect: false,
           enableSuggestions: false,
           autofocus: false,
+          style: TextStyle(color: Colors.black),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Please enter some text';
+              return 'Please enter some text.';
+            } else if (hintTitle == "Email" && !isValidEmail(value)) {
+              return 'Please enter valid email.';
             }
             return null;
           },
-          decoration: InputDecoration.collapsed(
+          decoration: InputDecoration(
+            enabledBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.black),
+            ),
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.blue),
+            ),
+            border: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.blue.shade800),
+            ),
+            errorBorder:
+                UnderlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+            prefixIcon: Icon(
+              icon,
+              color: Colors.blue.shade800,
+            ),
+            suffixIcon: hintTitle == "Password"
+                ? IconButton(
+                    color: Colors.blue.shade800,
+                    icon: Icon(
+                      _isObscure ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isObscure = !_isObscure;
+                      });
+                    },
+                  )
+                : null,
             hintText: hintTitle,
             hintStyle: const TextStyle(
                 fontSize: 18, color: Colors.grey, fontStyle: FontStyle.italic),
@@ -46,102 +84,115 @@ class Signup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 5.0, top: 50, right: 5),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset('assets/images/companyLogo.png'),
-              Container(
-                height: 400,
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Colors.white24,
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(15),
-                      topRight: Radius.circular(15)),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(15.0),
+    return SafeArea(
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        backgroundColor: Colors.white,
+        body: Column(
+          children: [
+            CustomPaint(
+              painter: linePainter(),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 25, left: 10),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: MediaQuery.of(context).size.height * 0.39,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(height: 45),
-                      Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            userInput(usernameController, 'Username',
-                                TextInputType.text),
-                            userInput(emailController, 'Email',
-                                TextInputType.emailAddress),
-                            userInput(passwordController, 'Password',
-                                TextInputType.visiblePassword),
-                          ],
-                        ),
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        "Signup",
+                        style: TextStyle(fontSize: 48.0),
                       ),
-                      Container(
-                        height: 55,
-                        // for an exact replicate, remove the padding.
-                        // pour une réplique exact, enlever le padding.
-                        padding:
-                            const EdgeInsets.only(top: 5, left: 70, right: 70),
-                        child: RaisedButton(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25)),
-                          color: Colors.blue.shade800,
-                          onPressed: () {
-                            _formKey.currentState!.validate();
-                            /* print(emailController);
-                          print(passwordController); */
-                            /* Provider.of<Auth>(context, listen: false).login(emailController.text, passwordController.text);
-                            Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => SuccessfulScreen())); */
-                          },
-                          child: const Text(
-                            'Sign up',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
+                      SizedBox(
+                        height: 10,
                       ),
+                      Text("with", style: TextStyle(fontSize: 32.0)),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text("Soneil",
+                          style: TextStyle(
+                              fontSize: 48.0,
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                              fontFamily: 'Rubik'))
                     ],
                   ),
                 ),
               ),
-              SizedBox(height: 20),
-              Text(
-                "OR",
-                style: TextStyle(
-                    color: Colors.blue.shade800, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              Wrap(
+            ),
+            Form(
+              key: _formKey,
+              child: Column(
                 children: [
-                  const Text("Already Registered? "),
-                  InkWell(
-                    onTap: () => {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => Login()),
-                      )
-                    },
-                    child: Text(
-                      "Log in",
-                      style: TextStyle(
-                          color: Colors.blue.shade800,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  )
+                  userInput(usernameController, 'Username', TextInputType.text,
+                      Icons.attribution_outlined),
+                  userInput(emailController, 'Email',
+                      TextInputType.emailAddress, Icons.email),
+                  userInput(passwordController, 'Password',
+                      TextInputType.visiblePassword, Icons.password),
                 ],
-              )
-            ],
-          ),
+              ),
+            ),
+            Container(
+              height: 55,
+              width: double.infinity,
+              // for an exact replicate, remove the padding.
+              // pour une réplique exact, enlever le padding.
+              padding: const EdgeInsets.only(top: 5, left: 10, right: 10),
+              child: RaisedButton(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25)),
+                color: Colors.blue.shade800,
+                onPressed: () {
+                  _formKey.currentState!.validate();
+                  /* print(emailController);
+                          print(passwordController); */
+                  /* Provider.of<Auth>(context, listen: false).login(emailController.text, passwordController.text);
+                            Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => SuccessfulScreen())); */
+                },
+                child: const Text(
+                  'Sign up',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            Text(
+              "OR",
+              style: TextStyle(
+                  color: Colors.blue.shade800, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            Wrap(
+              children: [
+                const Text(
+                  "Already Registered? ",
+                  style: TextStyle(color: Colors.black),
+                ),
+                InkWell(
+                  onTap: () => {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Login()),
+                    )
+                  },
+                  child: Text(
+                    "Log in",
+                    style: TextStyle(
+                        color: Colors.blue.shade800,
+                        fontWeight: FontWeight.bold),
+                  ),
+                )
+              ],
+            )
+          ],
         ),
       ),
     );
