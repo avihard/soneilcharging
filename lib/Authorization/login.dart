@@ -113,12 +113,11 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      minimum: EdgeInsets.zero,
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        backgroundColor: Colors.white,
-        body: Column(
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
           children: [
             Image.asset('assets/images/companyLogo.png'),
             Padding(
