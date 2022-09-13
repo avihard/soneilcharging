@@ -44,17 +44,18 @@ class _SignupState extends State<Signup> {
             return null;
           },
           decoration: InputDecoration(
-            enabledBorder: UnderlineInputBorder(
+            enabledBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.black),
             ),
-            focusedBorder: UnderlineInputBorder(
+            focusedBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.blue),
             ),
             border: UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.blue.shade800),
             ),
-            errorBorder:
-                UnderlineInputBorder(borderSide: BorderSide(color: Colors.red)),
+            errorBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.red),
+            ),
             prefixIcon: Icon(
               icon,
               color: Colors.blue.shade800,
@@ -84,16 +85,16 @@ class _SignupState extends State<Signup> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        backgroundColor: Colors.white,
-        body: Column(
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        physics: ClampingScrollPhysics(),
+        child: Column(
           children: [
             CustomPaint(
               painter: linePainter(),
               child: Padding(
-                padding: const EdgeInsets.only(top: 25, left: 10),
+                padding: const EdgeInsets.only(top: 50, left: 10),
                 child: SizedBox(
                   width: double.infinity,
                   height: MediaQuery.of(context).size.height * 0.39,
@@ -149,9 +150,9 @@ class _SignupState extends State<Signup> {
                 onPressed: () {
                   _formKey.currentState!.validate();
                   /* print(emailController);
-                          print(passwordController); */
+                            print(passwordController); */
                   /* Provider.of<Auth>(context, listen: false).login(emailController.text, passwordController.text);
-                            Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => SuccessfulScreen())); */
+                              Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => SuccessfulScreen())); */
                 },
                 child: const Text(
                   'Sign up',
