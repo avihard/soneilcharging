@@ -17,7 +17,6 @@ class ForgotPasswordWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return const SafeArea(
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
         backgroundColor: Colors.white,
         body: mainResetWidget(),
       ),
@@ -41,12 +40,22 @@ class _mainResetWidgetState extends State<mainResetWidget> {
   final TextEditingController _fieldThree = TextEditingController();
   final TextEditingController _fieldFour = TextEditingController();
 
+  late FocusNode firstFocusNode;
+  late FocusNode thirdFocusNode;
+  late FocusNode secondFocusNode;
+  late FocusNode fourthFocusNode;
+
+  /* bool isFirstEnable = true;
+  bool isSecondEnable = false;
+  bool isThirdEnable = false;
+  bool isFourthEnable = false; */
+/* 
   var enableTextArr = {
     "first": true,
     "second": false,
     "third": false,
     "fourth": false
-  };
+  }; */
 
   void setTextEdit(String value, String id) {
     String key = "first";
@@ -76,17 +85,28 @@ class _mainResetWidgetState extends State<mainResetWidget> {
       default:
     }
 
-    setState(() {
+    /* setState(() {
       enableTextArr[id] = false;
       enableTextArr[key] = true;
-    });
+    }); */
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    firstFocusNode = FocusNode();
+    secondFocusNode = FocusNode();
+    thirdFocusNode = FocusNode();
+    fourthFocusNode = FocusNode();
   }
 
   Widget userInput(TextEditingController userInput, String hintTitle,
       TextInputType keyboardType) {
     return Container(
       height: 55,
-      margin: EdgeInsets.only(bottom: 15),
+      margin: EdgeInsets.all(15),
       decoration: BoxDecoration(boxShadow: [
         BoxShadow(
           color: Colors.grey.withOpacity(0.5),
@@ -261,7 +281,7 @@ class _mainResetWidgetState extends State<mainResetWidget> {
               children: [
                 SizedBox(height: 15),
                 Text(
-                  "Reset Password1",
+                  "Reset Password",
                   style: TextStyle(
                       color: Colors.blue.shade800,
                       fontWeight: FontWeight.bold,
@@ -273,7 +293,144 @@ class _mainResetWidgetState extends State<mainResetWidget> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    OtpInput(_fieldOne, true, "first", enableTextArr['first'],
+                    SizedBox(
+                      width: 50,
+                      height: 60,
+                      child: TextField(
+                        enabled: true,
+                        key: Key("first"),
+                        autofocus: true,
+                        controller: _fieldOne,
+                        focusNode: firstFocusNode,
+                        textAlign: TextAlign.center,
+                        keyboardType: TextInputType.number,
+                        maxLength: 1,
+                        style: TextStyle(color: Colors.black),
+                        cursorColor: Theme.of(context).primaryColor,
+                        decoration: InputDecoration(
+                          enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.green)),
+                          disabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey)),
+                          border: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.black)),
+                          counterText: '',
+                          hintStyle:
+                              TextStyle(color: Colors.black, fontSize: 20.0),
+                        ),
+                        onChanged: (value) {
+                          if (value.length != 0) {
+                            FocusScope.of(context)
+                                .requestFocus(secondFocusNode);
+                          }
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      width: 50,
+                      height: 60,
+                      child: TextField(
+                        enabled: true,
+                        key: Key("second"),
+                        autofocus: true,
+                        controller: _fieldTwo,
+                        focusNode: secondFocusNode,
+                        textAlign: TextAlign.center,
+                        keyboardType: TextInputType.number,
+                        maxLength: 1,
+                        style: TextStyle(color: Colors.black),
+                        cursorColor: Theme.of(context).primaryColor,
+                        decoration: InputDecoration(
+                            enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.green)),
+                            disabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.grey)),
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.black)),
+                            counterText: '',
+                            hintStyle:
+                                TextStyle(color: Colors.black, fontSize: 20.0)),
+                        onChanged: (value) {
+                          setTextEdit(value, "second");
+                          if (value.length == 0) {
+                            FocusScope.of(context).requestFocus(firstFocusNode);
+                          } else {
+                            FocusScope.of(context).requestFocus(thirdFocusNode);
+                          }
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      width: 50,
+                      height: 60,
+                      child: TextField(
+                        enabled: true,
+                        key: Key("third"),
+                        autofocus: true,
+                        controller: _fieldThree,
+                        focusNode: thirdFocusNode,
+                        textAlign: TextAlign.center,
+                        keyboardType: TextInputType.number,
+                        maxLength: 1,
+                        style: TextStyle(color: Colors.black),
+                        cursorColor: Theme.of(context).primaryColor,
+                        decoration: InputDecoration(
+                            enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.green)),
+                            disabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.grey)),
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.black)),
+                            counterText: '',
+                            hintStyle:
+                                TextStyle(color: Colors.black, fontSize: 20.0)),
+                        onChanged: (value) {
+                          //setTextEdit(value, "third");
+                          if (value.length == 0) {
+                            FocusScope.of(context)
+                                .requestFocus(secondFocusNode);
+                          } else {
+                            FocusScope.of(context)
+                                .requestFocus(fourthFocusNode);
+                          }
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      width: 50,
+                      height: 60,
+                      child: TextField(
+                        enabled: true,
+                        key: Key("fourth"),
+                        autofocus: true,
+                        controller: _fieldFour,
+                        focusNode: fourthFocusNode,
+                        textAlign: TextAlign.center,
+                        keyboardType: TextInputType.number,
+                        maxLength: 1,
+                        style: TextStyle(color: Colors.black),
+                        cursorColor: Theme.of(context).primaryColor,
+                        decoration: InputDecoration(
+                            enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.green)),
+                            disabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.grey)),
+                            border: OutlineInputBorder(
+                                borderSide: BorderSide(color: Colors.black)),
+                            counterText: '',
+                            hintStyle:
+                                TextStyle(color: Colors.black, fontSize: 20.0)),
+                        onChanged: (value) {
+                          //setTextEdit(value, "fourth");
+                          if (value.length == 0) {
+                            FocusScope.of(context).requestFocus(thirdFocusNode);
+                          } else {
+                            setTextEdit(value, "fourth");
+                          }
+                        },
+                      ),
+                    ),
+                    /* OtpInput(_fieldOne, true, "first", enableTextArr['first'],
                         setTextEdit, firstTextFocusNode),
                     OtpInput(
                         _fieldTwo,
@@ -295,7 +452,7 @@ class _mainResetWidgetState extends State<mainResetWidget> {
                         "fourth",
                         enableTextArr['fourth'],
                         setTextEdit,
-                        fourTextFocusNode),
+                        fourTextFocusNode), */
                   ],
                 )
               ],
