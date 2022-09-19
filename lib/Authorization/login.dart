@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
 import 'package:soneilcharging/Authorization/signup.dart';
-import 'package:soneilcharging/Pages/settings.dart';
+import 'package:soneilcharging/Pages/settings/settings.dart';
 import 'package:soneilcharging/index.dart';
 import 'package:flutter/material.dart';
 
