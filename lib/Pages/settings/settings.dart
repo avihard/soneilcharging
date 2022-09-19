@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import '../helpers/utils.dart';
+import 'package:soneilcharging/Authorization/forgotpassword.dart';
+import '../../helpers/constant.dart';
+import '../../helpers/utils.dart';
+import 'editInformation.dart';
 
 class settingWidget extends StatefulWidget {
   const settingWidget({Key? key}) : super(key: key);
@@ -57,7 +60,7 @@ class _settingWidgetState extends State<settingWidget> {
           SizedBox(
             height: 20,
           ),
-          Align(heightFactor: 5, child: personalInfoWidget())
+          Align(heightFactor: 2, child: personalInfoWidget())
           /* Text(counter.toString()),
           ElevatedButton(
               child: const Text("Press me"),
@@ -84,17 +87,107 @@ class personalInfoWidget extends StatefulWidget {
 class _personalInfoWidgetState extends State<personalInfoWidget> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ElevatedButton(
-            onPressed: () => {
-                  setLoginStatus(false),
-                  Navigator.of(context).popUntil((route) => false),
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                      '/login', (Route<dynamic> route) => false)
-                },
-            child: const Text("LOGOUT"))
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 10),
+      child: Column(
+        children: [
+          Container(
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Information",
+                      style: headTexts,
+                    ),
+                    InkWell(
+                      child: const Text(
+                        "Edit",
+                        style: TextStyle(color: Colors.blueAccent),
+                      ),
+                      onTap: () => {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (ctx) => editPersonalInfo()))
+                      },
+                    )
+                  ],
+                ),
+                Divider(
+                  height: 10,
+                  color: Colors.blue.shade800,
+                  thickness: 1,
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.phone,
+                      size: 32,
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Column(
+                      children: [
+                        const Text("Username"),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        const Text(
+                          "dev1ceee",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.email,
+                      size: 32,
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("Email"),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        const Text(
+                          "vyasjeet13@gmail.com",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+              ],
+            ),
+          ),
+          ElevatedButton(
+              onPressed: () => {
+                    setLoginStatus(false),
+                    Navigator.of(context).popUntil((route) => false),
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                        '/login', (Route<dynamic> route) => false)
+                  },
+              child: const Text("LOGOUT"))
+        ],
+      ),
     );
   }
 }

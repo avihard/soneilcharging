@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:soneilcharging/Pages/settings.dart';
+import 'package:soneilcharging/Pages/settings/settings.dart';
 
 // functional widgets
 import 'Pages/home.dart';

@@ -50,6 +50,8 @@ TextStyle tableTitle = const TextStyle(
     color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20.0);
 
 // for normal regular texts
+TextStyle headTexts =
+    const TextStyle(color: Colors.white, fontSize: 24.0, fontFamily: 'Rubik');
 TextStyle normalTexts =
     const TextStyle(color: Colors.white, fontSize: 20.0, fontFamily: 'Rubik');
 TextStyle smallTexts =
@@ -67,4 +69,4 @@ TextStyle modelSubHeader = const TextStyle(
     color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20.0);
 
 TextStyle modelText = const TextStyle(
-    color: Colors.white, fontSize: 16.0, fontWeight: FontWeight.bold);
+    color: Colors.black, fontSize: 16.0, fontWeight: FontWeight.bold);
