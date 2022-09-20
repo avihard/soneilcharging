@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:soneilcharging/Pages/scheduling/addVehicle.dart';
 
 import '../../helpers/constant.dart';
 import 'departure.dart';
@@ -81,6 +82,29 @@ class timeSectionWidget extends StatelessWidget {
           ),
           onTap: () => {
             Navigator.of(context).push(createRoute(const departureWidget())),
+          },
+        ),
+        InkWell(
+          child: Container(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Add your vehicle",
+                    style: smallTexts,
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios_sharp,
+                    size: 16.0,
+                  )
+                ],
+              ),
+            ),
+          ),
+          onTap: () => {
+            Navigator.of(context).push(createRoute(const addVehicle())),
           },
         ),
       ],

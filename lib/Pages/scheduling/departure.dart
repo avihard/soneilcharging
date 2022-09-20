@@ -105,7 +105,7 @@ class _departureWidgetState extends State<departureWidget>
                         width: 40,
                       ),
                       Text(
-                        "Add departure time1.",
+                        "Add departure time.",
                         style: normalTexts,
                       )
                     ],
