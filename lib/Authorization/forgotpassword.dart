@@ -126,6 +126,8 @@ class _mainResetWidgetState extends State<mainResetWidget> {
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Please enter some text';
+            } else if (!isValidEmail(value)) {
+              return 'Please enter valid email.';
             }
             return null;
           },
