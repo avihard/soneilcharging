@@ -125,7 +125,7 @@ class _editPersonalInfoState extends State<editPersonalInfo> {
                                     visualDensity: VisualDensity.comfortable),
                                 onPressed: () => {
                                   setState(
-                                    () => {isResetPass = true},
+                                    () => {isResetPass = !isResetPass},
                                   )
                                 },
                                 child: const Text("Reset Password"),
@@ -193,11 +193,22 @@ class _resetPassWidgetState extends State<resetPassWidget> {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: const Duration(seconds: 10),
-      child: new Text("Toggle Me"),
-      height: 200,
-      color: Colors.tealAccent,
-      width: 100.0,
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+      ),
+      // Define how long the animation should take.
+      duration: const Duration(milliseconds: 900),
+      // Provide an optional curve to make the animation feel smoother.
+      curve: Curves.fastOutSlowIn,
+      child: Form(
+        child: Column(
+          children: [
+            const Text("Current Password:"),
+            const Text("New Password:"),
+            const Text("Confirm new Password:")
+          ],
+        ),
+      ),
     );
   }
 }

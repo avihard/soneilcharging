@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:soneilcharging/Pages/scheduling/addVehicle.dart';
+import 'package:soneilcharging/Pages/scheduling/calculator.dart';
 
 import '../../helpers/constant.dart';
+import '../../helpers/utils.dart';
 import 'departure.dart';
+import 'optimizeCharge.dart';
 
 class scheduleWidget extends StatefulWidget {
   const scheduleWidget({Key? key}) : super(key: key);
@@ -27,7 +30,8 @@ class _scheduleWidgetState extends State<scheduleWidget>
             "Set your times!",
             style: headerText,
           ),
-          timeSectionWidget()
+          timeSectionWidget(),
+          priceChargingWidget(),
         ],
       ),
     ));
@@ -36,26 +40,6 @@ class _scheduleWidgetState extends State<scheduleWidget>
 
 class timeSectionWidget extends StatelessWidget {
   const timeSectionWidget({Key? key}) : super(key: key);
-
-  // this function brings the new page from the right side.
-  Route createRoute(Widget page) {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => page,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0);
-        const end = Offset.zero;
-        const curve = Curves.ease;
-
-        var tween =
-            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-        return SlideTransition(
-          position: animation.drive(tween),
-          child: child,
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +65,8 @@ class timeSectionWidget extends StatelessWidget {
             ),
           ),
           onTap: () => {
-            Navigator.of(context).push(createRoute(const departureWidget())),
+            Navigator.of(context)
+                .push(createRouteAnim(const departureWidget())),
           },
         ),
         InkWell(
@@ -95,7 +80,7 @@ class timeSectionWidget extends StatelessWidget {
                     "Add your vehicle",
                     style: smallTexts,
                   ),
-                  Icon(
+                  const Icon(
                     Icons.arrow_forward_ios_sharp,
                     size: 16.0,
                   )
@@ -104,9 +89,99 @@ class timeSectionWidget extends StatelessWidget {
             ),
           ),
           onTap: () => {
-            Navigator.of(context).push(createRoute(const addVehicle())),
+            Navigator.of(context).push(createRouteAnim(const addVehicle())),
           },
         ),
+        const SizedBox(
+          height: 20,
+        ),
+      ],
+    );
+  }
+}
+
+class priceChargingWidget extends StatefulWidget {
+  const priceChargingWidget({Key? key}) : super(key: key);
+
+  @override
+  State<priceChargingWidget> createState() => _priceChargingWidgetState();
+}
+
+class _priceChargingWidgetState extends State<priceChargingWidget> {
+  dynamic colorVarBox1 = Colors.black;
+  dynamic colorVarBox2 = Colors.black;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          "Prices and Charging!",
+          style: headerText,
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        Wrap(
+          spacing: 20.0,
+          children: [
+            InkWell(
+              onTap: () => {
+                Navigator.of(context)
+                    .push(createRouteAnimDown(const chargePathWidget())),
+              },
+              onTapDown: (val) => {
+                setState(
+                  () => colorVarBox1 = Colors.grey,
+                )
+              },
+              onTapUp: (val) => {
+                setState(
+                  () => colorVarBox1 = Colors.black,
+                )
+              },
+              child: Container(
+                width: 150,
+                height: 100,
+                decoration: BoxDecoration(color: colorVarBox1),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    "Can't decide when to charge?",
+                    style: smallTexts,
+                  ),
+                ),
+              ),
+            ),
+            InkWell(
+              child: Container(
+                width: 150,
+                height: 100,
+                decoration: BoxDecoration(color: colorVarBox2),
+                child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      "Calculate Price and Time",
+                      style: smallTexts,
+                    )),
+              ),
+              onTap: () => {
+                Navigator.of(context)
+                    .push(createRouteAnim(const calculateWidget())),
+              },
+              onTapDown: (val) => {
+                setState(
+                  () => colorVarBox2 = Colors.grey,
+                )
+              },
+              onTapUp: (val) => {
+                setState(
+                  () => colorVarBox2 = Colors.black,
+                )
+              },
+            ),
+          ],
+        )
       ],
     );
   }

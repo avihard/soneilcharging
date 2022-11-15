@@ -3,7 +3,7 @@ import 'package:soneilcharging/Pages/settings/settings.dart';
 
 // functional widgets
 import 'Pages/home.dart';
-import 'Pages/profile.dart';
+import 'Pages/configuration.dart';
 import 'Pages/scheduling/schedule.dart';
 import 'functions/chargerData.dart';
 
