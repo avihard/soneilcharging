@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../helpers/constant.dart';
+import '../serivces/globalVars.dart';
 
 class myProfileWidget extends StatelessWidget {
   final GlobalKey<_chargeSettingWidgetState> _myWidgetState =
@@ -93,14 +94,19 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
 
   late int currentValue;
   late int maxCharging;
+  late int voltValue;
+
+  globalVars _myService = globalVars();
 
   bool isAutoStart = true;
+  bool isEcoCharging = true;
 
   // this funtion resets the settings
   void resetSettings() {
     setState(() {
       currentValue = 32;
       maxCharging = 100;
+      voltValue = 240;
     });
   }
 
@@ -110,6 +116,8 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
     super.initState();
     currentValue = 32;
     maxCharging = 100;
+    voltValue = 240;
+    isEcoCharging = _myService.ecoCharging;
   }
 
   Widget modalButtons(updateValues) {
@@ -142,11 +150,13 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
   Widget editChargeSetting() {
     int _currvalue = currentValue;
     int _maxchargevalue = maxCharging;
+    int _voltvalue = voltValue;
 
     void updateValues() {
       setState(() {
         currentValue = _currvalue;
         maxCharging = _maxchargevalue;
+        voltValue = _voltvalue;
       });
       Navigator.pop(context);
     }
@@ -264,6 +274,49 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
                             )
                           ],
                         ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Voltage",
+                              style: modelSubHeader,
+                            ),
+                            Text(
+                              "${_voltvalue} V",
+                              style: modelText,
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              "110",
+                              style: modelText,
+                            ),
+                            Expanded(
+                              child: Slider(
+                                  value: _voltvalue.toDouble(),
+                                  min: 110.0,
+                                  max: 240.0,
+                                  thumbColor: Colors.grey,
+                                  activeColor: Colors.black,
+                                  inactiveColor: Colors.grey,
+                                  label: 'Voltage',
+                                  onChanged: (double newValue) {
+                                    setState(() {
+                                      _voltvalue = newValue.toInt();
+                                    });
+                                  },
+                                  semanticFormatterCallback: (double newValue) {
+                                    return '${newValue.round()} A';
+                                  }),
+                            ),
+                            Text(
+                              "240",
+                              style: modelText,
+                            )
+                          ],
+                        ),
                         modalButtons(updateValues),
                       ],
                     )
@@ -335,7 +388,7 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
           const SizedBox(
             height: 20,
           ),
-          chargeSettingRow("Voltage", "210"),
+          chargeSettingRow("Voltage", voltValue.toString()),
           const Divider(
             height: 20,
             color: Colors.grey,
@@ -368,6 +421,32 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
           ),
           const Text(
             "Enabling Autostart will start the charging as soon as you plug the charger to the car.",
+            style: TextStyle(color: Colors.grey),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Eco-charging",
+                style: tableTitle,
+                textAlign: TextAlign.start,
+              ),
+              Switch(
+                activeColor: Colors.blue.shade800,
+                value: isEcoCharging,
+                onChanged: (value) => {
+                  setState(
+                    () => {
+                      isEcoCharging = value,
+                      _myService.setEcoCharging(isEcoCharging)
+                    },
+                  ),
+                },
+              ),
+            ],
+          ),
+          const Text(
+            "Enabling eco charging will make sure that when electricity prices are at lowest, the current and voltage will be set to maximum for fast charging.",
             style: TextStyle(color: Colors.grey),
           )
           /* for wifi enable and disable*/

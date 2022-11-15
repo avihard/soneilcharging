@@ -90,6 +90,7 @@ class _personalInfoWidgetState extends State<personalInfoWidget> {
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16, top: 10),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             child: Column(
@@ -178,14 +179,17 @@ class _personalInfoWidgetState extends State<personalInfoWidget> {
               ],
             ),
           ),
-          ElevatedButton(
-              onPressed: () => {
-                    setLoginStatus(false),
-                    Navigator.of(context).popUntil((route) => false),
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                        '/login', (Route<dynamic> route) => false)
-                  },
-              child: const Text("LOGOUT"))
+          Align(
+            alignment: FractionalOffset.bottomCenter,
+            child: ElevatedButton(
+                onPressed: () => {
+                      setLoginStatus(false),
+                      Navigator.of(context).popUntil((route) => false),
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          '/login', (Route<dynamic> route) => false)
+                    },
+                child: const Text("LOGOUT")),
+          ),
         ],
       ),
     );

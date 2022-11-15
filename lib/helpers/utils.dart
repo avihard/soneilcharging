@@ -1,16 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// this funtion redirects the page with animation
-Route createRoute(page) {
-  return PageRouteBuilder(
-    pageBuilder: (context, animation, secondaryAnimation) => page,
-    transitionsBuilder: (c, anim, a2, child) =>
-        FadeTransition(opacity: anim, child: child),
-    transitionDuration: Duration(milliseconds: 500),
-  );
-}
-
 Future<void> setLoginStatus(value) async {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   final SharedPreferences prefs = await _prefs;
@@ -125,3 +115,99 @@ class resetPainter extends CustomPainter {
     return true;
   }
 }
+
+// vertical line
+class DashedLineVerticalPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    double dashHeight = 5, dashSpace = 3, startY = 0;
+    final paint = Paint()
+      ..color = Colors.white38
+      ..strokeWidth = 1;
+    while (startY < size.height) {
+      canvas.drawLine(Offset(0, startY), Offset(0, startY + dashHeight), paint);
+      startY += dashHeight + dashSpace;
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
+}
+
+// this funtion redirects the page with animation
+Route createRoute(page) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => page,
+    transitionsBuilder: (c, anim, a2, child) =>
+        FadeTransition(opacity: anim, child: child),
+    transitionDuration: Duration(milliseconds: 500),
+  );
+}
+
+// this function brings the new page from the right side.
+Route createRouteAnim(Widget page) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => page,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(1.0, 0.0);
+      const end = Offset.zero;
+      const curve = Curves.ease;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  );
+}
+
+Route createRouteAnimDown(Widget page) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => page,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(0.0, 1.0);
+      const end = Offset.zero;
+      const curve = Curves.ease;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  );
+}
+
+//////////// HELPFUL FUNTIONS /////////////
+String getTimeStringFromDouble(hourValue, minuteValue, value) {
+  if (value < 0) return 'Invalid Value';
+  return '$hourValue hour $minuteValue minutes';
+}
+
+// calculates minutes in a string
+String getMinuteString(double value) {
+  int flooredValue = value.floor();
+  double decimalValue = value - flooredValue;
+  return '${(decimalValue * 60).toInt()}'.padLeft(2, '0');
+}
+
+// calculates minutes to fraction
+double convertMinutetoFraction(int minuteValue) {
+  return (minuteValue / 60).toDouble();
+}
+
+// calculates hour in a string
+String getHourString(double value) {
+  int flooredValue = value.floor();
+  double decimalValue = value - flooredValue;
+  return '${flooredValue % 24}'.padLeft(2, '0');
+}
+
+Widget showTime(time) {
+  return Text(time);
+}
+
+  //////// END  ///////////////////

@@ -6,19 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:battery/battery.dart';
 import 'dart:async';
 import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:intl/intl.dart';
 
 import '../helpers/constant.dart';
+import '../serivces/globalVars.dart';
 import 'history/currChargeHistory.dart';
 
 const dynamic informationObject = [
-  {"title": "Current", "value": 32, "unit": "Ampere", "icons": Icons.volcano},
-  {"title": "Voltage", "value": 205, "unit": "Voltage", "icons": Icons.volcano},
-  {
-    "title": "Temperature",
-    "value": 26,
-    "unit": "Celsius",
-    "icons": Icons.volcano
-  },
+  {"title": "Current", "value": 32, "unit": "A", "icons": Icons.volcano},
+  {"title": "Voltage", "value": 205, "unit": "V", "icons": Icons.volcano},
+  {"title": "Temperature", "value": 26, "unit": "*C", "icons": Icons.volcano},
   {"title": "Cycles", "value": 4, "unit": "", "icons": Icons.volcano}
 ];
 
@@ -36,6 +33,8 @@ class HomeWidget extends StatelessWidget {
             height: 40,
           ),
           informationWidget(onButtonPressed: onButtonPressed),
+          // estimated time and price.
+          priceandtimeWidget(),
         ],
       ),
     );
@@ -137,6 +136,15 @@ class _batteryWidgetState extends State<batteryWidget> {
 
   @override
   Widget build(BuildContext context) {
+    globalVars _myService = globalVars();
+    // set data so that it can be used globally
+    _myService.setBatteryLevel(60);
+    _myService.setCurrentLevel(16);
+    _myService.setVoltLevel(200);
+    _myService.setBatteryCapacity(100);
+    _myService.setChargingStartTime(DateFormat("HH:mm").format(DateTime(
+        DateTime.now().year, DateTime.now().month, DateTime.now().day, 18, 9)));
+
     return Column(
       children: [
         Stack(
@@ -289,5 +297,71 @@ class _informationWidgetState extends State<informationWidget> {
         alignment: Alignment.center,
         constraints: BoxConstraints.expand(height: 200),
         child: imageSlider(context));
+  }
+}
+
+class priceandtimeWidget extends StatelessWidget {
+  const priceandtimeWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+              width: (MediaQuery.of(context).size.width / 2 -
+                  18), // change this if you add padding
+              height: 150,
+              child: Column(
+                children: const [
+                  Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Text(
+                      "Estimated Time",
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 24),
+                    child: Text("00:15:00",
+                        style: TextStyle(
+                            fontSize: 24, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              )),
+        ),
+        Container(
+          color: Colors.white,
+          height: 100,
+          width: 2,
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            width: (MediaQuery.of(context).size.width / 2 -
+                18), // change this if you add padding
+            height: 150,
+            child: Column(
+              children: const [
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    "Estimated Cost",
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 24),
+                  child: Text("4.65 CAD",
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
+          ),
+        )
+      ],
+    );
   }
 }

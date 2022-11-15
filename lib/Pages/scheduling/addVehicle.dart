@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:imageview360/imageview360.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:soneilcharging/Authorization/forgotpassword.dart';
 
 import '../../helpers/constant.dart';
 import '../../helpers/carModels.dart';
@@ -47,23 +48,29 @@ class _addVehicleState extends State<addVehicle> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text("Select your car model"),
+        const Text(
+          "Select your car model",
+        ),
         Container(
-            // child: Dropdown,
-            child: DropdownButton<dynamic>(
-                items: carModels
-                    .map((e) => DropdownMenuItem(
-                          child: Text(e['Model']),
-                          value: e['Model'],
-                        ))
-                    .toList(),
-                value: _carModel,
-                onChanged: (value) {
-                  setState(() {
-                    selectedYear = 0;
-                    _carModel = value;
-                  });
-                }))
+          // child: Dropdown,
+          child: DropdownButton<dynamic>(
+              items: carModels
+                  .map((e) => DropdownMenuItem(
+                        child: Text(
+                          e['Model'],
+                          style: TextStyle(fontSize: 11),
+                        ),
+                        value: e['Model'],
+                      ))
+                  .toList(),
+              value: _carModel,
+              onChanged: (value) {
+                setState(() {
+                  selectedYear = 0;
+                  _carModel = value;
+                });
+              }),
+        ),
       ],
     );
   }
@@ -72,11 +79,13 @@ class _addVehicleState extends State<addVehicle> {
     return InkWell(
       child: Container(
         width: 50,
-        height: 30,
+        height: 40,
         color: selectedYear == item ? Colors.blue.shade800 : Colors.black,
-        child: Text(
-          item.toString(),
-          textAlign: TextAlign.center,
+        child: Center(
+          child: Text(
+            item.toString(),
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
       onTap: () => {
@@ -100,7 +109,8 @@ class _addVehicleState extends State<addVehicle> {
           crossAxisAlignment: WrapCrossAlignment.center,
           alignment: WrapAlignment.spaceAround,
           spacing: 20,
-          children: [for (var item in yearArr[0]['Year']) showYearBlock(item)],
+          runSpacing: 10,
+          children: [for (var item in yearArr[0]['Years']) showYearBlock(item)],
         )
       ],
     );
