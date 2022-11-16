@@ -188,31 +188,32 @@ class _addVehicleState extends State<addVehicle> {
                       width: 200,
                       decoration: BoxDecoration(color: Colors.black45),
                       child: Swiper(
-                          controller: scrollController,
-                          viewportFraction: 0.5,
-                          itemCount: brands.length,
-                          scrollDirection: Axis.vertical,
-                          outer: true,
-                          itemHeight: 10,
-                          index: selectedIndex,
-                          onIndexChanged: (int Index) {
-                            selectedIndex = Index;
-                            _carModel = '';
-                            isLevel = 0;
-                            selectedYear = 0;
-                          },
-                          itemBuilder: (BuildContext context, int index) {
-                            return Center(
-                              child: Container(
-                                width: MediaQuery.of(context).size.width,
-                                child: Text(
-                                  brands[index],
-                                  textAlign: TextAlign.center,
-                                ),
+                        controller: scrollController,
+                        viewportFraction: 0.5,
+                        itemCount: brands.length,
+                        scrollDirection: Axis.vertical,
+                        outer: true,
+                        itemHeight: 10,
+                        index: selectedIndex,
+                        onIndexChanged: (int Index) {
+                          selectedIndex = Index;
+                          _carModel = '';
+                          isLevel = 0;
+                          selectedYear = 0;
+                        },
+                        itemBuilder: (BuildContext context, int index) {
+                          return Center(
+                            child: Container(
+                              width: MediaQuery.of(context).size.width,
+                              child: Text(
+                                brands[index],
+                                textAlign: TextAlign.center,
                               ),
-                            );
-                          }),
-                    )
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(

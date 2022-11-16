@@ -114,9 +114,9 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
   void initState() {
     // TODO: implement initState
     super.initState();
-    currentValue = 32;
-    maxCharging = 100;
-    voltValue = 240;
+    currentValue = _myService.currentLevel;
+    maxCharging = _myService.targetBatteryLevel;
+    voltValue = _myService.voltLevel;
     isEcoCharging = _myService.ecoCharging;
   }
 
@@ -153,6 +153,10 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
     int _voltvalue = voltValue;
 
     void updateValues() {
+      // updating global variables
+      _myService.setCurrentLevel(_currvalue);
+      _myService.setVoltLevel(_voltvalue);
+      _myService.setTargetBatteryLevel(_maxchargevalue);
       setState(() {
         currentValue = _currvalue;
         maxCharging = _maxchargevalue;
@@ -163,9 +167,7 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
 
     return BottomSheet(
         enableDrag: false,
-        onClosing: () {
-          print("hello");
-        },
+        onClosing: () {},
         builder: (BuildContext context) {
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {

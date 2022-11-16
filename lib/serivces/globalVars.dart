@@ -3,7 +3,8 @@ import 'package:intl/intl.dart';
 class globalVars {
   static final globalVars _instance = globalVars._internal();
 
-  late var _batteryLevel;
+  late var _currentBatteryLevel;
+  late var _targetBatteryLevel;
   late var _currentLevel;
   late var _voltLevel;
   late var _batteryCapacity;
@@ -15,15 +16,24 @@ class globalVars {
 
   //initialize variables in here
   globalVars._internal() {
-    _batteryLevel = 0;
+    _currentBatteryLevel = 0;
+    _currentLevel = 0;
   }
 
   //short getter for my variable
-  int get batteryLevel => _batteryLevel;
+  int get currentBatteryLevel => _currentBatteryLevel;
 
   //short setter for my variable
-  void setBatteryLevel(int value) {
-    _batteryLevel = value;
+  void setCurrentBatteryLevel(int value) {
+    _currentBatteryLevel = value;
+  }
+
+  //short getter for my variable
+  int get targetBatteryLevel => _targetBatteryLevel;
+
+  //short setter for my variable
+  void setTargetBatteryLevel(int value) {
+    _targetBatteryLevel = value;
   }
 
   //short getter for my variable
@@ -69,7 +79,8 @@ class globalVars {
   Map<String, dynamic> createJson() {
     Map<String, dynamic> deviceInfo = {
       "batteryCapacity": _batteryCapacity,
-      "batteryLevel": _batteryLevel,
+      "currentBatteryLevel": _currentBatteryLevel,
+      "targetBatteryLevel": _targetBatteryLevel,
       "currentLevel": _currentLevel,
       "voltLevel": _voltLevel,
       "chargingStartTime": _chargingTime,

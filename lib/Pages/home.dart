@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 
 import '../helpers/constant.dart';
 import '../serivces/globalVars.dart';
+import 'history/chargeHistoryList.dart';
 import 'history/currChargeHistory.dart';
 
 const dynamic informationObject = [
@@ -51,7 +52,8 @@ class batteryWidget extends StatefulWidget {
 
 class _batteryWidgetState extends State<batteryWidget> {
   final battery = Battery();
-  int batteryLevel = 100;
+  globalVars _myService = globalVars();
+  int batteryLevel = 70;
   BatteryState batteryState = BatteryState.full;
 
   late Timer timer;
@@ -106,7 +108,7 @@ class _batteryWidgetState extends State<batteryWidget> {
           children: [
             Stack(
               children: [
-                Icon(Icons.battery_charging_full_sharp,
+                Icon(Icons.battery_charging_full_rounded,
                     size: size, color: color),
               ],
             ),
@@ -114,7 +116,7 @@ class _batteryWidgetState extends State<batteryWidget> {
           ],
         );
       case BatteryState.charging:
-        final color = Colors.green;
+        final color = Colors.yellow;
 
         return Column(
           children: [
@@ -136,11 +138,8 @@ class _batteryWidgetState extends State<batteryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    globalVars _myService = globalVars();
     // set data so that it can be used globally
-    _myService.setBatteryLevel(60);
-    _myService.setCurrentLevel(16);
-    _myService.setVoltLevel(200);
+    _myService.setCurrentBatteryLevel(60);
     _myService.setBatteryCapacity(100);
     _myService.setChargingStartTime(DateFormat("HH:mm").format(DateTime(
         DateTime.now().year, DateTime.now().month, DateTime.now().day, 18, 9)));
@@ -176,7 +175,7 @@ class _batteryWidgetState extends State<batteryWidget> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => currChargeHistoryWidget()),
+                              builder: (context) => chargeHistoryListWidget()),
                         )
                       },
                     ),

@@ -143,7 +143,7 @@ class _showCarPlanWidgetState extends State<showCarPlanWidget> {
           isCrossingEcoCheck = true;
           var totalCharged = timetoEco * -1 * power;
           var remainingCharging = (widget.carStatus['batteryCapacity'] *
-                  widget.carStatus['batteryLevel'] /
+                  widget.carStatus['targetBatteryLevel'] /
                   100) -
               totalCharged;
 
@@ -168,7 +168,7 @@ class _showCarPlanWidgetState extends State<showCarPlanWidget> {
 
     // calculating total capacity in reference to target level.
     var capacityPerLevel = widget.carStatus['batteryCapacity'] *
-        widget.carStatus['batteryLevel'] /
+        widget.carStatus['targetBatteryLevel'] /
         100;
 
     // calculating total capacity in reference to target level.
@@ -277,7 +277,9 @@ class _showCarPlanWidgetState extends State<showCarPlanWidget> {
               "Charging with current: 32A and Voltage: 240V", "19:00"),
         showPlanRow(
             "Charging Done",
-            "This assumption is for 100% charging. Change target level to see changes here.",
+            "This assumption is for " +
+                widget.carStatus['targetBatteryLevel'].toString() +
+                "% charging. Change target level to see changes here.",
             chargingEndTime,
             true),
       ],
@@ -286,7 +288,7 @@ class _showCarPlanWidgetState extends State<showCarPlanWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.carStatus['batteryLevel'] < 100) {
+    if (widget.carStatus['currentBatteryLevel'] < 100) {
       return Padding(
         padding: const EdgeInsets.only(top: 24),
         child: Column(

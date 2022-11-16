@@ -81,6 +81,13 @@ class _departureWidgetState extends State<departureWidget>
                   ),
                 ],
               ),
+              Padding(
+                padding: const EdgeInsets.only(left: 32, top: 8),
+                child: Text(
+                  "Create schedule to charge your car. Charging will automatically start if the car is plugged in during this time.",
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
               if (!isAdded) scheduleConfig(notifyParent: departList),
               if (isAdded)
                 Padding(
