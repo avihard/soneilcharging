@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
-
+import 'package:intl/intl.dart';
 import '../../helpers/constant.dart';
+import '../../helpers/utils.dart';
+import '../../interface/chargingHistoryInterface.dart';
 
 final Map<int, String?> months = {
   0: "January",
@@ -19,6 +19,8 @@ final Map<int, String?> months = {
   10: "November",
   11: "December"
 };
+
+final Map<int, List<chargingHistoryInterface>> monthChargingList = {};
 
 class chargeHistoryListWidget extends StatefulWidget {
   const chargeHistoryListWidget({Key? key}) : super(key: key);
@@ -85,51 +87,136 @@ class _chargingHistorySelectionWidgetState
   int selectedIndex = 0;
   String selectedMonth = '';
 
+  // selected months charging List
+  List<chargingHistoryInterface> listofCharging = [];
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     selectedIndex = months.length - remainingMonth - 1;
+
+    fillChargingHistory();
+
+    listofCharging = monthChargingList[selectedIndex]!;
+
+    // this is just for testing purpose
+    writeCounter("test.txt", "ss");
+  }
+
+  void fillChargingHistory() {
+    for (var i = 0; i < months.length; i++) {
+      chargingHistoryInterface chargeHistory =
+          chargingHistoryInterface(7.83, 4.00, "07-01-2022", "08:00", "13:00");
+      if (monthChargingList.isEmpty || monthChargingList[i] == null) {
+        monthChargingList[i] = [];
+      }
+      monthChargingList[i]?.add(chargeHistory);
+    }
+  }
+
+  Widget chargeRowElem(label, value) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Text(
+            label,
+            textAlign: TextAlign.left,
+          ),
+          Text(
+            value,
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 16.0),
-          child: Container(
-            height: 80,
-            decoration: BoxDecoration(color: Colors.black45),
-            child: Swiper(
-              controller: scrollController,
-              viewportFraction: 0.5,
-              itemCount: (months.length - remainingMonth),
-              scrollDirection: Axis.horizontal,
-              outer: true,
-              itemHeight: 10,
-              index: selectedIndex,
-              onIndexChanged: (int Index) {
-                selectedIndex = Index;
-                setState(() {
-                  selectedMonth = months[selectedIndex]!;
-                });
-              },
+    readCounter("test.txt");
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 16.0),
+            child: Container(
+              height: 80,
+              decoration: BoxDecoration(color: Colors.black45),
+              child: Swiper(
+                controller: scrollController,
+                viewportFraction: 0.5,
+                itemCount: (months.length - remainingMonth),
+                scrollDirection: Axis.horizontal,
+                outer: true,
+                itemHeight: 10,
+                index: selectedIndex,
+                onIndexChanged: (int Index) {
+                  selectedIndex = Index;
+                  setState(() {
+                    selectedMonth = months[selectedIndex]!;
+                  });
+                },
+                itemBuilder: (BuildContext context, int index) {
+                  return Center(
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      child: Text(
+                        months[index]!,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          ListView.builder(
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              physics: ClampingScrollPhysics(),
+              itemCount: listofCharging.length,
               itemBuilder: (BuildContext context, int index) {
-                return Center(
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
                   child: Container(
-                    width: MediaQuery.of(context).size.width,
-                    child: Text(
-                      months[index]!,
-                      textAlign: TextAlign.center,
+                    child: ExpansionTile(
+                      //initiallyExpanded: selected,
+                      //key: GlobalKey(),
+                      title: Text(listofCharging[index].chargingDate),
+                      //trailing: Text(widget.setTimes[index]['time'].format(context)),
+                      /* onExpansionChanged: (value) {
+                        return value ? _selectTime(index) : null;
+                      }, */
+                      children: [
+                        SizedBox(
+                          height: 140,
+                          width: 300,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              chargeRowElem("Start Time",
+                                  listofCharging[index].startTime),
+                              chargeRowElem(
+                                  "End Time", listofCharging[index].endTime),
+                              chargeRowElem(
+                                  "Cost",
+                                  listofCharging[index]
+                                      .chargingPrice
+                                      .toString()),
+                              chargeRowElem(
+                                  "Date", listofCharging[index].chargingDate),
+                            ],
+                          ),
+                        )
+                      ],
                     ),
                   ),
                 );
-              },
-            ),
-          ),
-        ),
-      ],
+              }),
+        ],
+      ),
     );
   }
 }

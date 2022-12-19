@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> setLoginStatus(value) async {
@@ -210,4 +213,54 @@ Widget showTime(time) {
   return Text(time);
 }
 
-  //////// END  ///////////////////
+//////// END  ///////////////////
+
+/// This block gets path to the application and stores the data in the txt file, performs CRUD operations /////
+
+Future<String> get _localPath async {
+  final directory = await getApplicationDocumentsDirectory();
+
+  return directory.path;
+}
+
+Future<File> _localFile(fileName) async {
+  final path = await _localPath;
+  return File('$path/$fileName');
+}
+
+/*Future<File> get _localFile async {
+  final path = await _localPath;
+  print(path);
+  return File('$path/chargeHistory.txt');
+}*/
+
+/* 
+Files we have
+  chargingStatus.txt
+  addedVehicles.txt
+  scheduleCharging.txt
+*/
+
+Future<void> writeCounter(fileName, jsonStr) async {
+  final file = await _localFile(fileName);
+
+  // Write the file
+  await file.writeAsString(jsonStr);
+}
+
+Future<String> readCounter(fileName) async {
+  try {
+    final file = await _localFile(fileName);
+
+    // Read the file
+    final contents = await file.readAsString();
+
+    return contents as String;
+  } catch (e) {
+    // If encountering an error, return 0
+    return "";
+  }
+}
+
+
+/// END /////

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:soneilcharging/Authorization/forgotpassword.dart';
 import '../../helpers/constant.dart';
 import '../../helpers/utils.dart';
@@ -16,6 +17,7 @@ class _settingWidgetState extends State<settingWidget> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
+        child: SingleChildScrollView(
       child: Column(
         children: [
           Stack(
@@ -73,7 +75,7 @@ class _settingWidgetState extends State<settingWidget> {
                   }), */
         ],
       ),
-    );
+    ));
   }
 }
 
@@ -179,6 +181,7 @@ class _personalInfoWidgetState extends State<personalInfoWidget> {
               ],
             ),
           ),
+          DeviceSettingWidget(),
           Align(
             alignment: FractionalOffset.bottomCenter,
             child: ElevatedButton(
@@ -230,5 +233,55 @@ class _directtomeState extends State<directtome> {
         ],
       ),
     ));
+  }
+}
+
+// device settings section
+class DeviceSettingWidget extends StatefulWidget {
+  const DeviceSettingWidget({Key? key}) : super(key: key);
+
+  @override
+  State<DeviceSettingWidget> createState() => _DeviceSettingWidgetState();
+}
+
+class _DeviceSettingWidgetState extends State<DeviceSettingWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Charging & Device Settings",
+            style: normalTexts,
+          ),
+          Divider(
+            height: 10,
+            color: Colors.blue.shade800,
+            thickness: 1,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 8),
+            child: InkWell(
+              onTap: () {
+                print('InkWell onTap Called');
+              },
+              child: Container(
+                  height: 40,
+                  width: MediaQuery.of(context).size.width,
+                  child: const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Device Settings',
+                      style: TextStyle(fontSize: 16.0),
+                    ),
+                  )),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

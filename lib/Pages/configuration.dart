@@ -10,21 +10,6 @@ class myProfileWidget extends StatelessWidget {
       GlobalKey<_chargeSettingWidgetState>();
   myProfileWidget({Key? key}) : super(key: key);
 
-  Widget stopChargingButton() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        primary: Colors.black87,
-        minimumSize: const Size.fromHeight(50), // NEW
-        elevation: 10,
-      ),
-      onPressed: () {},
-      child: const Text(
-        'STOP CHARGING',
-        style: TextStyle(fontSize: 16),
-      ),
-    );
-  }
-
   Widget resetChargingButton() {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
@@ -58,7 +43,6 @@ class myProfileWidget extends StatelessWidget {
               const SizedBox(
                 height: 20,
               ),
-              stopChargingButton(),
               const Divider(
                 thickness: 1,
                 height: 30,
@@ -92,9 +76,9 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
   @override
   bool get wantKeepAlive => true;
 
-  late int currentValue;
+  late double currentValue;
   late int maxCharging;
-  late int voltValue;
+  late double voltValue;
 
   globalVars _myService = globalVars();
 
@@ -148,9 +132,9 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
   }
 
   Widget editChargeSetting() {
-    int _currvalue = currentValue;
+    double _currvalue = currentValue;
     int _maxchargevalue = maxCharging;
-    int _voltvalue = voltValue;
+    double _voltvalue = voltValue;
 
     void updateValues() {
       // updating global variables
@@ -219,7 +203,7 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
                                   label: 'Current',
                                   onChanged: (double newValue) {
                                     setState(() {
-                                      _currvalue = newValue.toInt();
+                                      _currvalue = newValue;
                                     });
                                   },
                                   semanticFormatterCallback: (double newValue) {
@@ -306,7 +290,7 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
                                   label: 'Voltage',
                                   onChanged: (double newValue) {
                                     setState(() {
-                                      _voltvalue = newValue.toInt();
+                                      _voltvalue = newValue;
                                     });
                                   },
                                   semanticFormatterCallback: (double newValue) {
@@ -406,7 +390,7 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "AutoStart",
+                "Charge Immediately",
                 style: tableTitle,
                 textAlign: TextAlign.start,
               ),
