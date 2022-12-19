@@ -1,49 +1,212 @@
 // ignore_for_file: unnecessary_new
 
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:battery/battery.dart';
 import 'dart:async';
+import 'package:http/http.dart' as http;
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:intl/intl.dart';
 
 import '../helpers/constant.dart';
+import '../helpers/utils.dart';
 import '../serivces/globalVars.dart';
+import 'chargerAdd/addChargerMsg.dart';
+import 'history/chargeHistoryList.dart';
 import 'history/currChargeHistory.dart';
+import 'dart:convert';
+import 'package:soneilcharging/my_flutter_app_icons.dart';
 
 const dynamic informationObject = [
-  {"title": "Current", "value": 32, "unit": "A", "icons": Icons.volcano},
-  {"title": "Voltage", "value": 205, "unit": "V", "icons": Icons.volcano},
-  {"title": "Temperature", "value": 26, "unit": "*C", "icons": Icons.volcano},
-  {"title": "Cycles", "value": 4, "unit": "", "icons": Icons.volcano}
+  {
+    "title": "Current",
+    "value": 32,
+    "unit": "A",
+    "icons": MyFlutterApp.flash_auto
+  },
+  {
+    "title": "Voltage",
+    "value": 205,
+    "unit": "V",
+    "icons": Icons.electric_meter
+  },
+  {
+    "title": "Temperature",
+    "value": 26,
+    "unit": "*C",
+    "icons": Icons.thermostat
+  },
+  {"title": "Cycle", "value": 4, "unit": "", "icons": Icons.loop},
+  {"title": "Set Current", "value": 4, "unit": "A", "icons": Icons.volcano},
+  {"title": "Power", "value": 4, "unit": "kw", "icons": Icons.power},
+  {
+    "title": "Energy",
+    "value": 4,
+    "unit": "kwh",
+    "icons": Icons.energy_savings_leaf_outlined
+  }
 ];
 
-class HomeWidget extends StatelessWidget {
+// chargingStatus Number
+Map<String, dynamic> statusMap = {"status": 0};
+
+// singleton service
+globalVars _myService = globalVars();
+
+//saving into the local file of the device
+void saveChargeStatus(status) async {
+  var response = null;
+  if (status == 1) {
+    response = await http.get(Uri.parse('chargePause'));
+  } else {
+    response = await http.get(Uri.parse('chargeResume'));
+  }
+
+  if (response.statusCode == 200) {
+    // If the server did return a 200 OK response,
+    // then parse the JSON.
+    statusMap['status'] = status;
+    final jsonStr = jsonEncode(statusMap);
+
+    // writing the saved vehicle data to localfile
+    writeCounter("chargingStatus.txt", jsonStr);
+  } else {
+    // If the server did not return a 200 OK response,
+    // then throw an exception.
+    throw 'failed';
+  }
+}
+
+// reading from localfile
+void readChargeStatus() async {
+  String jsonStr = await readCounter("chargingStatus.txt");
+  // reading from file and setting our local map to it
+
+  //addedVehicles = jsonDecode(jsonStr);
+}
+
+class HomeWidget extends StatefulWidget {
   final VoidCallback onButtonPressed;
   const HomeWidget({Key? key, required this.onButtonPressed}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          batteryWidget(),
-          SizedBox(
-            height: 40,
-          ),
-          informationWidget(onButtonPressed: onButtonPressed),
-          // estimated time and price.
-          priceandtimeWidget(),
-        ],
+  State<HomeWidget> createState() => _HomeWidgetState();
+}
+
+class _HomeWidgetState extends State<HomeWidget> {
+  bool isChargerAdded = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    isChargerAdded = _myService.isCharger;
+  }
+
+  Stream<Map<String, dynamic>> getData() async* {
+    yield* Stream.fromFuture(fetchAlbum());
+    yield* Stream.periodic(const Duration(seconds: 10), (_) {
+      return fetchAlbum();
+    }).asyncMap((event) async => await event);
+  }
+
+  Widget stopChargingButton() {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        fixedSize: Size(200, 50),
+        primary: Colors.red.shade900,
+        elevation: 10,
+      ),
+      onPressed: () {
+        saveChargeStatus(1);
+      },
+      child: const Text(
+        'STOP CHARGING',
+        style: TextStyle(fontSize: 16),
       ),
     );
+  }
+
+  Widget resumeChargingButton() {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        fixedSize: Size(200, 50),
+        primary: Colors.green.shade900,
+        elevation: 10,
+      ),
+      onPressed: () {
+        saveChargeStatus(2);
+      },
+      child: const Text(
+        'RESUME CHARGING',
+        style: TextStyle(fontSize: 16),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isChargerAdded) {
+      return SafeArea(
+        child: addChargerMsgWidget(),
+      );
+    } else {
+      return StreamBuilder(
+          stream: getData(),
+          builder: (
+            BuildContext context,
+            AsyncSnapshot snapshot,
+          ) {
+            if (snapshot.connectionState == ConnectionState.active ||
+                snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    '${snapshot.error} occurred',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                );
+
+                // if we got our data
+              } else if (snapshot.hasData) {
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      batteryWidget(snapshot: snapshot),
+                      SizedBox(
+                        height: 40,
+                      ),
+                      snapshot.data['Status'] == "Charging"
+                          ? stopChargingButton()
+                          : const Text(""),
+                      snapshot.data['Status'] == "Paused"
+                          ? resumeChargingButton()
+                          : const Text(""),
+                      informationWidget(
+                          onButtonPressed: widget.onButtonPressed,
+                          snapshot: snapshot),
+                      // estimated time and price.
+                      priceandtimeWidget(),
+                    ],
+                  ),
+                );
+              }
+            }
+            // Displaying LoadingSpinner to indicate waiting state
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          });
+    }
   }
 }
 
 // this widget shows battery charging information
 class batteryWidget extends StatefulWidget {
-  const batteryWidget({Key? key}) : super(key: key);
+  final AsyncSnapshot snapshot;
+  const batteryWidget({Key? key, required this.snapshot}) : super(key: key);
 
   @override
   State<batteryWidget> createState() => _batteryWidgetState();
@@ -51,7 +214,7 @@ class batteryWidget extends StatefulWidget {
 
 class _batteryWidgetState extends State<batteryWidget> {
   final battery = Battery();
-  int batteryLevel = 100;
+  int batteryLevel = 70;
   BatteryState batteryState = BatteryState.full;
 
   late Timer timer;
@@ -86,9 +249,9 @@ class _batteryWidgetState extends State<batteryWidget> {
   } */
 
   Widget buildBatteryLevel(int batteryLevel) => Text(
-        '$batteryLevel%',
+        '16 kWh / 10mih',
         style: TextStyle(
-          fontSize: 46,
+          fontSize: 24,
           color: Colors.white,
           fontWeight: FontWeight.bold,
         ),
@@ -106,15 +269,21 @@ class _batteryWidgetState extends State<batteryWidget> {
           children: [
             Stack(
               children: [
-                Icon(Icons.battery_charging_full_sharp,
-                    size: size, color: color),
+                Image.asset(
+                  "assets/images/evcharger.gif",
+                  height: 125.0,
+                  width: 125.0,
+                ),
+                /* Icon(Icons.battery_charging_full_rounded,
+                    size: size, color: color), */
               ],
             ),
-            Text('Full!', style: style.copyWith(color: color)),
+            Text(widget.snapshot.data['Status'].toString(),
+                style: style.copyWith(color: color)),
           ],
         );
       case BatteryState.charging:
-        final color = Colors.green;
+        final color = Colors.yellow;
 
         return Column(
           children: [
@@ -136,12 +305,12 @@ class _batteryWidgetState extends State<batteryWidget> {
 
   @override
   Widget build(BuildContext context) {
-    globalVars _myService = globalVars();
     // set data so that it can be used globally
-    _myService.setBatteryLevel(60);
-    _myService.setCurrentLevel(16);
-    _myService.setVoltLevel(200);
+    //_myService.setCurrentBatteryLevel(60);
+    _myService.setCurrentLevel(double.parse(widget.snapshot.data['Current']));
+    _myService.setVoltLevel(double.parse(widget.snapshot.data['Voltage']));
     _myService.setBatteryCapacity(100);
+    _myService.setTargetBatteryLevel(100);
     _myService.setChargingStartTime(DateFormat("HH:mm").format(DateTime(
         DateTime.now().year, DateTime.now().month, DateTime.now().day, 18, 9)));
 
@@ -176,12 +345,18 @@ class _batteryWidgetState extends State<batteryWidget> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => currChargeHistoryWidget()),
+                              builder: (context) => chargeHistoryListWidget()),
                         )
                       },
                     ),
                     const SizedBox(height: 32),
-                    buildBatteryLevel(batteryLevel),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        const Text("Range Added"),
+                        buildBatteryLevel(batteryLevel),
+                      ],
+                    )
                   ],
                 ),
               ),
@@ -197,8 +372,9 @@ class _batteryWidgetState extends State<batteryWidget> {
                 decoration: BoxDecoration(
                   color: Colors.grey.shade600,
                 ),
-                child: const Text(
-                  "Last Updated on 11:42 AM.",
+                child: Text(
+                  "Last Updated on " +
+                      DateFormat('hh:mm a').format(DateTime.now()).toString(),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -213,7 +389,9 @@ class _batteryWidgetState extends State<batteryWidget> {
 // this widget shows information and other parameters about the charger.
 class informationWidget extends StatefulWidget {
   final VoidCallback onButtonPressed;
-  const informationWidget({Key? key, required this.onButtonPressed})
+  final AsyncSnapshot snapshot;
+  const informationWidget(
+      {Key? key, required this.onButtonPressed, required this.snapshot})
       : super(key: key);
 
   @override
@@ -272,7 +450,8 @@ class _informationWidgetState extends State<informationWidget> {
                     height: 20,
                   ),
                   Text(
-                    informationObject[index]['value'].toString() +
+                    widget.snapshot.data[informationObject[index]['title']]
+                            .toString() +
                         " " +
                         informationObject[index]['unit'].toString(),
                     style: headerText,
@@ -283,7 +462,7 @@ class _informationWidgetState extends State<informationWidget> {
           ),
         );
       },
-      itemCount: 4,
+      itemCount: 7,
       viewportFraction: 0.7,
       scale: 0.8,
     );
@@ -363,5 +542,228 @@ class priceandtimeWidget extends StatelessWidget {
         )
       ],
     );
+  }
+}
+
+Map<String, dynamic> parseData(String data) {
+  var s = data;
+  String timeanddata = '',
+      ipAddress = '',
+      idValue = '',
+      Volt = '',
+      Current = '',
+      Temperature = '',
+      tempType = '',
+      Curve = '',
+      CurveTime = '',
+      Cycle = '',
+      Status = '',
+      Rev = '',
+      widthChart = '',
+      chargerName = '',
+      setCur = '',
+      power = '',
+      energy = '';
+
+  var arrTxt = s.split(r'$$__');
+  if (arrTxt.isNotEmpty) //datetime,tmON,Connection,macId-SN
+  {
+    var elValues = arrTxt[0].split(',');
+    if (elValues.isNotEmpty) {
+      var datendtime = elValues[0].split(":");
+      timeanddata =
+          "${datendtime[0]}:${datendtime[1]}:${datendtime[2]} ${datendtime[3]}:${datendtime[4]}:${datendtime[5]}";
+    }
+    //if (elValues.length > 1)
+    //    document.getElementById("ON_TIME").innerHTML = elValues[1];
+    if (elValues.length > 2) {
+      ipAddress = elValues[2];
+    }
+    if (elValues.length > 3) {
+      idValue = (elValues[3].split("#")[1]).split("]")[0];
+    }
+  }
+  if (arrTxt.length > 1) //volt,current,temp
+  {
+    var elValues = arrTxt[1].split(','); //this.responseText;
+    if (elValues.isNotEmpty) {
+      Volt = elValues[0];
+    }
+    if (elValues.length > 1) {
+      Current = elValues[1];
+    }
+    if (elValues.length > 2) {
+      Temperature = elValues[2];
+    }
+    if (elValues.length > 3) {
+      tempType = elValues[3];
+    }
+  }
+  if (arrTxt.length > 2) //selectedCurve,tmCurve,cycle#,tmStage
+  {
+    var elValues = arrTxt[2].split(','); //this.responseText;
+    if (elValues.isNotEmpty) {
+      Curve = elValues[0];
+    }
+    if (elValues.length > 1) {
+      CurveTime = elValues[1];
+    }
+    if (elValues.length > 2) {
+      Cycle = elValues[2];
+    }
+    if (elValues.length > 3) {
+      Status = elValues[3];
+    }
+    // this is only for ev chargers
+    if (elValues.length > 4) {
+      var evValues = elValues[4].split(":");
+      setCur = evValues[0];
+      power = evValues[1];
+      energy = evValues[2];
+    }
+  }
+  if (arrTxt.length > 3) //selectedCurve,tmCurve,cycle#,tmStage
+  {
+    var elValues = arrTxt[3].split(','); //this.responseText;
+    if (elValues.isNotEmpty) {
+      widthChart = elValues[0];
+    }
+  }
+  if (arrTxt.length > 4) {
+    var elValues = arrTxt[4].split(','); //this.responseText;
+    if (elValues.isNotEmpty) {
+      Rev = elValues[0];
+    }
+    if (elValues.length > 1) {
+      var nameArr = elValues[1].split(" ");
+      //chargerName = nameArr[0] + " " + nameArr[1] + " " + nameArr[2];
+      //var singletonObject = Singleton();
+      //singletonObject.setChargerName(chargerName);
+    }
+    /* if (elValues.length > 1) {
+      let nameArr = elValues[1].split(" ");
+      var chargname = document.getElementById("chargerName").innerHTML = nameArr[0]+ " "+ nameArr[1] + " <span class='color-text'>" + nameArr[2] + "</span>";
+      sessionStorage.setItem("chargname", elValues[1]); 
+    } */
+  }
+  DataInterface dataObject = DataInterface(
+      timeanddata,
+      ipAddress,
+      idValue,
+      Volt,
+      Current,
+      Temperature,
+      tempType,
+      Curve,
+      CurveTime,
+      Cycle,
+      Status,
+      Rev,
+      widthChart,
+      chargerName,
+      setCur,
+      power,
+      energy);
+  String jsonUser = jsonEncode(dataObject);
+
+  Map<String, dynamic> dataMap = jsonDecode(jsonUser);
+  var dataObjectValue = DataInterface.fromJson(dataMap);
+
+  return dataMap;
+}
+
+// this class holds the value for data coming from API
+class DataInterface {
+  final String timeanddata,
+      ipAddress,
+      idValue,
+      Volt,
+      Current,
+      Temperature,
+      temp_type,
+      Curve,
+      Curve_time,
+      Cycle,
+      Status,
+      Rev,
+      widthChart,
+      chargerName,
+      setCur, // newly added
+      power,
+      energy;
+
+  DataInterface(
+      this.timeanddata,
+      this.ipAddress,
+      this.idValue,
+      this.Volt,
+      this.Current,
+      this.Temperature,
+      this.temp_type,
+      this.Curve,
+      this.Curve_time,
+      this.Cycle,
+      this.Status,
+      this.Rev,
+      this.widthChart,
+      this.chargerName,
+      this.setCur,
+      this.power,
+      this.energy);
+
+  DataInterface.fromJson(Map<String, dynamic> json)
+      : timeanddata = json['timeanddata'],
+        ipAddress = json['ipAddress'],
+        idValue = json['idValue'],
+        Volt = json['Voltage'],
+        Current = json['Current'],
+        Temperature = json['Temperature'],
+        temp_type = json['temp_type'],
+        Curve = json['Curve'],
+        Curve_time = json['Curve_time'],
+        Cycle = json['Cycle'],
+        Status = json['Status'],
+        Rev = json['Rev'],
+        widthChart = json['widthChart'],
+        chargerName = json['chargerName'],
+        setCur = json['setCur'],
+        power = json['power'],
+        energy = json['energy'];
+
+  Map<String, dynamic> toJson() => {
+        'timeanddata': timeanddata,
+        'ipAddress': ipAddress,
+        'idValue': idValue,
+        'Voltage': Volt,
+        'Current': Current,
+        'Temperature': Temperature,
+        'temp_type': temp_type,
+        'Curve': Curve,
+        'Curve_time': Curve_time,
+        'Cycle': Cycle,
+        'Status': Status,
+        'Rev': Rev,
+        'widthChart': widthChart,
+        'chargerName': chargerName,
+        'Set Current': setCur,
+        'Power': power,
+        'Energy': energy
+      };
+}
+
+// API CALL
+Future<Map<String, dynamic>> fetchAlbum() async {
+  final response =
+      await http.get(Uri.parse('http://192.168.4.1/ajax_switch?p=1'));
+
+  if (response.statusCode == 200) {
+    // If the server did return a 200 OK response,
+    // then parse the JSON.
+    Map<String, dynamic> dataObjectValue = parseData(response.body);
+    return dataObjectValue;
+  } else {
+    // If the server did not return a 200 OK response,
+    // then throw an exception.
+    throw 'failed';
   }
 }

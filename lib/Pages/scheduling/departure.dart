@@ -1,5 +1,48 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import '../../helpers/constant.dart';
+import '../../helpers/utils.dart';
+
+var daysMap = {
+  "Sun": 0,
+  "Mon": 1,
+  "Tue": 2,
+  "Wed": 3,
+  "Thur": 4,
+  "Fri": 5,
+  "Sat": 6
+};
+
+//saving into the local file of the device
+void saveScheduleTime(setTimes) {
+  List tempSetTimes = [];
+  final now = new DateTime.now();
+
+  tempSetTimes = setTimes
+      .map((e) => {
+            "id": e['id'],
+            'selectedDays': e['selectedDays'],
+            'label': e['label'],
+            'maxHrs': e['maxHrs'],
+            'time': DateTime(now.year, now.month, now.day, e['time'].hour,
+                    e['time'].minute)
+                .toIso8601String()
+          })
+      .toList();
+
+  /* for (var i = 0; i < tempSetTimes.length; i++) {
+    tempSetTimes[i]['time'] = DateTime(now.year, now.month, now.day,
+            setTimes[i]['time'].hour, setTimes[i]['time'].minute)
+        .toIso8601String();
+
+    tempSetTimes[i]['label'] = setTimes[i]['label'] + "_1";
+  } */
+
+  final jsonStr = jsonEncode(tempSetTimes);
+  // writing the saved vehicle data to localfile
+  writeCounter("scheduleCharging.txt", jsonStr);
+}
 
 class departureWidget extends StatefulWidget {
   const departureWidget({Key? key}) : super(key: key);
@@ -18,11 +61,47 @@ class _departureWidgetState extends State<departureWidget>
 
   List setTimes = [];
 
+  // reading from localfile
+  void readScheduleTime() async {
+    String jsonStr = await readCounter("scheduleCharging.txt");
+
+    List tempList = jsonDecode(jsonStr);
+
+    tempList = tempList
+        .map((e) => {
+              "id": e['id'],
+              'selectedDays': e['selectedDays'],
+              'label': e['label'],
+              'maxHrs': e['maxHrs'],
+              'time': TimeOfDay(
+                  hour: DateTime.parse(e['time']).hour,
+                  minute: DateTime.parse(e['time']).minute)
+            })
+        .toList();
+
+    setState(() {
+      setTimes = tempList;
+    });
+
+    // reading from file and setting our local map to it
+
+    //addedVehicles = jsonDecode(jsonStr);
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    // read from file
+    readScheduleTime();
+  }
+
   void clearDepartList() {
     setState(() {
       isAdded = true;
       setTimes.clear();
     });
+    saveScheduleTime(setTimes);
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(
         "All times cleared.",
@@ -34,23 +113,38 @@ class _departureWidgetState extends State<departureWidget>
     ));
   }
 
+  void setScheduleTime() {
+    // convert day to day index
+    for (var i = 0; i < setTimes.length; i++) {
+      for (var j = 0; j < setTimes[i]['selectedDays'].length; i++) {}
+    }
+  }
+
   void departList(addedTime) {
     setState(() {
       isAdded = true;
       setTimes.add(addedTime);
     });
+
+    // API call here
+    // create data in format
+    setScheduleTime();
+
+    saveScheduleTime(setTimes);
   }
 
   void deleteElement(id) {
     setState(() {
       setTimes.removeWhere((element) => element['id'] == id);
     });
+    saveScheduleTime(setTimes);
   }
 
-  void saveElement(id) {
+  void saveElement() {
     setState(() {
       isAdded = true;
     });
+    saveScheduleTime(setTimes);
   }
 
   @override
@@ -80,6 +174,13 @@ class _departureWidgetState extends State<departureWidget>
                     style: headerText,
                   ),
                 ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 32, top: 8),
+                child: Text(
+                  "Create schedule to charge your car. Charging will automatically start if the car is plugged in during this time.",
+                  style: TextStyle(color: Colors.grey),
+                ),
               ),
               if (!isAdded) scheduleConfig(notifyParent: departList),
               if (isAdded)
@@ -139,6 +240,9 @@ class scheduleConfig extends StatefulWidget {
 class _scheduleConfigState extends State<scheduleConfig> {
   TimeOfDay _time = TimeOfDay(hour: 12, minute: 00);
   TextEditingController depLabel = new TextEditingController();
+
+  // max charging hr controller
+  TextEditingController maxHrs = new TextEditingController(text: "10");
 
   Map<String, dynamic> currentTime = {};
 
@@ -234,6 +338,16 @@ class _scheduleConfigState extends State<scheduleConfig> {
               Padding(
                 padding: const EdgeInsets.only(left: 16.0, right: 16.0),
                 child: TextField(
+                  controller: maxHrs,
+                  decoration: const InputDecoration(
+                    hintText: 'Max charging hours.',
+                    labelText: 'Max Charge Hours',
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+                child: TextField(
                   controller: depLabel,
                   decoration: const InputDecoration(
                     hintText: 'Give name to your departure.',
@@ -255,9 +369,12 @@ class _scheduleConfigState extends State<scheduleConfig> {
                               'id': UniqueKey().hashCode,
                               'time': _time,
                               'selectedDays': _selectedIndexs,
+                              'maxHrs': maxHrs.text.isNotEmpty
+                                  ? double.parse(maxHrs.text)
+                                  : 10.0,
                               'label': depLabel.text.isNotEmpty
                                   ? depLabel.text
-                                  : "Departure"
+                                  : "Departure",
                             }),
                             widget.notifyParent(currentTime)
                           },
@@ -277,7 +394,7 @@ class setDepartureWidget extends StatefulWidget {
   final List setTimes;
   final Function() notifyParent;
   final Function(dynamic) deleteElement;
-  final Function(dynamic) saveElement;
+  final Function() saveElement;
   const setDepartureWidget(
       {Key? key,
       required this.setTimes,
@@ -292,6 +409,15 @@ class setDepartureWidget extends StatefulWidget {
 
 class _setDepartureWidgetState extends State<setDepartureWidget> {
   bool selected = false;
+
+  //TextEditingController maxHrs = new TextEditingController(text: );
+  List<TextEditingController> textControllers = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   Widget weekCheckboxes(elem) {
     return Container(
@@ -333,6 +459,7 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
 
   @override
   Widget build(BuildContext context) {
+    textControllers = [];
     if (widget.setTimes.isEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -383,13 +510,14 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
             physics: const ScrollPhysics(),
             itemCount: widget.setTimes.length,
             itemBuilder: (BuildContext context, int index) {
+              textControllers.add(new TextEditingController(
+                  text: widget.setTimes[index]['maxHrs'].toString()));
               return ExpansionTile(
-                initiallyExpanded: selected,
-                key: GlobalKey(),
+                //initiallyExpanded: selected,
+                //key: GlobalKey(),
                 title: Text(widget.setTimes[index]['label']),
                 trailing: Text(widget.setTimes[index]['time'].format(context)),
                 onExpansionChanged: (value) {
-                  selected = value;
                   return value ? _selectTime(index) : null;
                 },
                 children: [
@@ -403,16 +531,26 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
                   const SizedBox(
                     height: 5,
                   ),
+                  TextField(
+                    controller: textControllers[index],
+                    decoration: const InputDecoration(
+                      hintText: 'Max charging hours.',
+                      labelText: 'Max Charge Hours',
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          setState(() {
-                            selected = !selected;
-                          });
+                          widget.setTimes[index]['maxHrs'] =
+                              textControllers[index].text;
+                          print(widget.setTimes[index]);
                           // here we will call API to save the data
-                          // widget.saveElement(widget.setTimes[index]['id']);
+                          widget.saveElement();
                         },
                         child: const Text("Save"),
                       ),

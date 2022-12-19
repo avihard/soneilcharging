@@ -53,7 +53,7 @@ class timeSectionWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Departure Time",
+                    "Schedule Charging",
                     style: smallTexts,
                   ),
                   Icon(
@@ -116,7 +116,7 @@ class _priceChargingWidgetState extends State<priceChargingWidget> {
     return Column(
       children: [
         Text(
-          "Prices and Charging!",
+          "Charging!",
           style: headerText,
         ),
         SizedBox(
@@ -146,9 +146,17 @@ class _priceChargingWidgetState extends State<priceChargingWidget> {
                 decoration: BoxDecoration(color: colorVarBox1),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    "Can't decide when to charge?",
-                    style: smallTexts,
+                  child: Column(
+                    children: [
+                      Icon(Icons.paste_outlined),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        "Charging Plan",
+                        style: smallTexts,
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -159,11 +167,20 @@ class _priceChargingWidgetState extends State<priceChargingWidget> {
                 height: 100,
                 decoration: BoxDecoration(color: colorVarBox2),
                 child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      "Calculate Price and Time",
-                      style: smallTexts,
-                    )),
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Icon(Icons.calculate),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        "Charging Calculator",
+                        style: smallTexts,
+                      ),
+                    ],
+                  ),
+                ),
               ),
               onTap: () => {
                 Navigator.of(context)

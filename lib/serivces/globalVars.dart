@@ -3,42 +3,51 @@ import 'package:intl/intl.dart';
 class globalVars {
   static final globalVars _instance = globalVars._internal();
 
-  late var _batteryLevel;
-  late var _currentLevel;
-  late var _voltLevel;
-  late var _batteryCapacity;
+  late var _currentBatteryLevel = 0;
+  late var _targetBatteryLevel = 0;
+  late double _currentLevel = 0;
+  late double _voltLevel = 110.00;
+  late var _batteryCapacity = 0;
   late bool _isEcoCharging = true;
   late String _chargingTime =
       DateFormat("hh:mm:ss").format(DateTime(2022, 11, 14, 12, 9));
+
+  late bool _isChargerAdded = false;
   // passes the instantiation to the _instance object
   factory globalVars() => _instance;
 
   //initialize variables in here
-  globalVars._internal() {
-    _batteryLevel = 0;
+  globalVars._internal() {}
+
+  //short getter for my variable
+  int get currentBatteryLevel => _currentBatteryLevel;
+
+  //short setter for my variable
+  void setCurrentBatteryLevel(int value) {
+    _currentBatteryLevel = value;
   }
 
   //short getter for my variable
-  int get batteryLevel => _batteryLevel;
+  int get targetBatteryLevel => _targetBatteryLevel;
 
   //short setter for my variable
-  void setBatteryLevel(int value) {
-    _batteryLevel = value;
+  void setTargetBatteryLevel(int value) {
+    _targetBatteryLevel = value;
   }
 
   //short getter for my variable
-  int get currentLevel => _currentLevel;
+  double get currentLevel => _currentLevel;
 
   //short setter for my variable
-  void setCurrentLevel(int value) {
+  void setCurrentLevel(double value) {
     _currentLevel = value;
   }
 
   //short getter for my variable
-  int get voltLevel => _voltLevel;
+  double get voltLevel => _voltLevel;
 
   //short setter for my variable
-  void setVoltLevel(int value) {
+  void setVoltLevel(double value) {
     _voltLevel = value;
   }
 
@@ -66,10 +75,19 @@ class globalVars {
     _isEcoCharging = value;
   }
 
+  //short getter for isChargerAdded
+  bool get isCharger => _isChargerAdded;
+
+  //short setter for isChargerAdded
+  void setIsCharger(bool value) {
+    _isChargerAdded = value;
+  }
+
   Map<String, dynamic> createJson() {
     Map<String, dynamic> deviceInfo = {
       "batteryCapacity": _batteryCapacity,
-      "batteryLevel": _batteryLevel,
+      "currentBatteryLevel": _currentBatteryLevel,
+      "targetBatteryLevel": _targetBatteryLevel,
       "currentLevel": _currentLevel,
       "voltLevel": _voltLevel,
       "chargingStartTime": _chargingTime,
