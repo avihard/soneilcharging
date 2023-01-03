@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:soneilcharging/Authorization/forgotpassword.dart';
+import 'package:soneilcharging/Pages/settings/addedVehiclesList.dart';
 import '../../helpers/constant.dart';
 import '../../helpers/utils.dart';
+import 'deviceSettings.dart';
 import 'editInformation.dart';
 
 class settingWidget extends StatefulWidget {
@@ -266,18 +266,39 @@ class _DeviceSettingWidgetState extends State<DeviceSettingWidget> {
             padding: const EdgeInsets.only(top: 8, bottom: 8),
             child: InkWell(
               onTap: () {
-                print('InkWell onTap Called');
+                Navigator.of(context).push(createRoute(DeviceInfoWidget()));
               },
               child: Container(
-                  height: 40,
-                  width: MediaQuery.of(context).size.width,
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Device Settings',
-                      style: TextStyle(fontSize: 16.0),
-                    ),
-                  )),
+                height: 40,
+                width: MediaQuery.of(context).size.width,
+                child: const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Device Settings',
+                    style: TextStyle(fontSize: 16.0),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 0, bottom: 8),
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context)
+                    .push(createRoute(addedVehiclesListWidget()));
+              },
+              child: Container(
+                height: 20,
+                width: MediaQuery.of(context).size.width,
+                child: const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Added Vehicles',
+                    style: TextStyle(fontSize: 16.0),
+                  ),
+                ),
+              ),
             ),
           ),
         ],

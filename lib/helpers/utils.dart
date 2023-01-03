@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:soneilcharging/helpers/constant.dart';
 
 Future<void> setLoginStatus(value) async {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -262,5 +263,19 @@ Future<String> readCounter(fileName) async {
   }
 }
 
-
 /// END /////
+
+//// SnackBar Start /////
+showSnackBar(context, message) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text(
+      message,
+      style: smallTexts,
+    ),
+    backgroundColor: Colors.blue,
+    dismissDirection: DismissDirection.down,
+    elevation: 10,
+  ));
+}
+
+/// END  ////
