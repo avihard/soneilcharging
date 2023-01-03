@@ -60,23 +60,47 @@ List models = [
   {
     "Maker": "Audi",
     "Model": "E-tron GT",
-    "Years": [2021, 2022, 2023]
+    "Years": [2021, 2022, 2023],
+    "Acceleration": 3.3,
+    "TopSpeed": 250,
+    "Range": 405,
+    "Efficiency": 210,
+    "FastChargeSpeed": 810,
+    "Drive": "All Wheel Drive"
   },
   {
     "Maker": "Audi",
     "Model": "E-tron Sportback 55 Quattro",
     "Years": [2021, 2022, 2023],
-    "Miles": 0.44
+    "Miles": 0.44,
+    "Acceleration": 5.7,
+    "TopSpeed": 200,
+    "Range": 375,
+    "Efficiency": 231,
+    "FastChargeSpeed": 600,
+    "Drive": "All Wheel Drive"
   },
   {
     "Maker": "Audi",
     "Model": "Q4 E-Tron",
-    "Years": [2021, 2022, 2023]
+    "Years": [2021, 2022, 2023],
+    "Acceleration": 9.0,
+    "TopSpeed": 160,
+    "Range": 280,
+    "Efficiency": 184,
+    "FastChargeSpeed": 390,
+    "Drive": "Rear Wheel Drive"
   },
   {
     "Maker": "Audi",
     "Model": "Q4 E-Tron Sportback",
-    "Years": [2021, 2022, 2023]
+    "Years": [2021, 2022, 2023],
+    "Acceleration": 9.0,
+    "TopSpeed": 160,
+    "Range": 295,
+    "Efficiency": 175,
+    "FastChargeSpeed": 410,
+    "Drive": "Rear Wheel Drive"
   },
   {
     "Maker": "Audi",
@@ -122,7 +146,13 @@ List models = [
     "Maker": "BMW",
     "Model": "i3",
     "Years": [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022],
-    "Miles": 0.3
+    "Miles": 0.3,
+    "Acceleration": 7.3,
+    "TopSpeed": 150,
+    "Range": 235,
+    "Efficiency": 161,
+    "FastChargeSpeed": 270,
+    "Drive": "Rear Wheel Drive"
   },
   {
     "Maker": "BMW",
@@ -138,7 +168,13 @@ List models = [
   {
     "Maker": "BMW",
     "Model": "i4",
-    "Years": [2021, 2022, 2023]
+    "Years": [2021, 2022, 2023],
+    "Acceleration": 3.9,
+    "TopSpeed": 225,
+    "Range": 450,
+    "Efficiency": 179,
+    "FastChargeSpeed": 630,
+    "Drive": "All Wheel Drive"
   },
   {
     "Maker": "BMW",
@@ -212,7 +248,13 @@ List models = [
     "Maker": "Fiat",
     "Model": "500e",
     "Years": [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022],
-    "Miles": 0.3
+    "Miles": 0.3,
+    "Acceleration": 9.0,
+    "TopSpeed": 150,
+    "Range": 245,
+    "Efficiency": 152,
+    "FastChargeSpeed": 410,
+    "Drive": "Front Wheel Drive"
   },
   {
     "Maker": "Ford",
@@ -244,7 +286,13 @@ List models = [
     "Maker": "Ford",
     "Model": "Mustang Mach-E",
     "Years": [2021, 2022, 2023],
-    "Miles": 0.34
+    "Miles": 0.34,
+    "Acceleration": 6.9,
+    "TopSpeed": 180,
+    "Range": 355,
+    "Efficiency": 197,
+    "FastChargeSpeed": 380,
+    "Drive": "Rear Wheel Drive"
   },
   {
     "Maker": "Genesis",
@@ -286,13 +334,25 @@ List models = [
   {
     "Maker": "Hyundai",
     "Model": "Ioniq 5",
-    "Years": [2022, 2023]
+    "Years": [2022, 2023],
+    "Acceleration": 5.2,
+    "TopSpeed": 185,
+    "Range": 370,
+    "Efficiency": 196,
+    "FastChargeSpeed": 860,
+    "Drive": "All Wheel Drive"
   },
   {
     "Maker": "Hyundai",
     "Model": "Ioniq Electric",
     "Years": [2017, 2018, 2019, 2020, 2021],
-    "Miles": 0.25
+    "Miles": 0.25,
+    "Acceleration": 9.7,
+    "TopSpeed": 165,
+    "Range": 250,
+    "Efficiency": 153,
+    "FastChargeSpeed": 220,
+    "Drive": "Front Wheel Drive"
   },
   {
     "Maker": "Hyundai",
@@ -308,7 +368,13 @@ List models = [
     "Maker": "Hyundai",
     "Model": "Kona Electric",
     "Years": [2019, 2020, 2021, 2022, 2023],
-    "Miles": 0.27
+    "Miles": 0.27,
+    "Acceleration": 7.9,
+    "TopSpeed": 167,
+    "Range": 395,
+    "Efficiency": 162,
+    "FastChargeSpeed": 370,
+    "Drive": "Front Wheel Drive"
   },
   {
     "Maker": "Hyundai",
@@ -329,7 +395,13 @@ List models = [
     "Maker": "Jaguar",
     "Model": "I-Pace",
     "Years": [2019, 2020, 2021, 2022, 2023],
-    "Miles": 0.44
+    "Miles": 0.44,
+    "Acceleration": 4.8,
+    "TopSpeed": 200,
+    "Range": 365,
+    "Efficiency": 232,
+    "FastChargeSpeed": 340,
+    "Drive": "All Wheel Drive"
   },
   {
     "Maker": "Jeep",
@@ -349,13 +421,25 @@ List models = [
   {
     "Maker": "Kia",
     "Model": "EV6",
-    "Years": [2022, 2023]
+    "Years": [2022, 2023],
+    "Acceleration": 3.5,
+    "TopSpeed": 260,
+    "Range": 395,
+    "Efficiency": 196,
+    "FastChargeSpeed": 920,
+    "Drive": "All Wheel Drive"
   },
   {
     "Maker": "Kia",
     "Model": "Niro EV",
     "Years": [2019, 2020, 2021, 2022, 2023],
-    "Miles": 0.3
+    "Miles": 0.3,
+    "Acceleration": 7.8,
+    "TopSpeed": 167,
+    "Range": 370,
+    "Efficiency": 173,
+    "FastChargeSpeed": 350,
+    "Drive": "Front Wheel Drive"
   },
   {
     "Maker": "Kia",
@@ -376,7 +460,13 @@ List models = [
     "Maker": "Kia",
     "Model": "Soul EV",
     "Years": [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023],
-    "Miles": 0.31
+    "Miles": 0.31,
+    "Acceleration": 7.9,
+    "TopSpeed": 167,
+    "Range": 370,
+    "Efficiency": 173,
+    "FastChargeSpeed": 350,
+    "Drive": "Front Wheel Drive"
   },
   {
     "Maker": "Land Rover",
@@ -411,18 +501,36 @@ List models = [
   {
     "Maker": "Lucid",
     "Model": "Air",
-    "Years": [2022, 2023]
+    "Years": [2022, 2023],
+    "Acceleration": 4.2,
+    "TopSpeed": 200,
+    "Range": 540,
+    "Efficiency": 157,
+    "FastChargeSpeed": 1410,
+    "Drive": "Rear Wheel Drive"
   },
   {
     "Maker": "Lucid",
     "Model": "Air Grand Touring",
     "Years": [2022, 2023],
-    "Miles": 0.26
+    "Miles": 0.26,
+    "Acceleration": 3.2,
+    "TopSpeed": 270,
+    "Range": 660,
+    "Efficiency": 167,
+    "FastChargeSpeed": 1380,
+    "Drive": "All Wheel Drive"
   },
   {
     "Maker": "Mazda",
     "Model": "MX-30",
-    "Years": [2020, 2021, 2022, 2023]
+    "Years": [2020, 2021, 2022, 2023],
+    "Acceleration": 9.7,
+    "TopSpeed": 140,
+    "Range": 170,
+    "Efficiency": 176,
+    "FastChargeSpeed": 180,
+    "Drive": "Front Wheel Drive"
   },
   {
     "Maker": "Mercedes-Benz",
@@ -433,12 +541,24 @@ List models = [
   {
     "Maker": "Mercedes-Benz",
     "Model": "EQB",
-    "Years": [2022, 2023]
+    "Years": [2022, 2023],
+    "Acceleration": 6.5,
+    "TopSpeed": 160,
+    "Range": 340,
+    "Efficiency": 196,
+    "FastChargeSpeed": 400,
+    "Drive": "All Wheel Drive"
   },
   {
     "Maker": "Mercedes-Benz",
     "Model": "EQC",
-    "Years": [2019, 2020, 2021, 2022]
+    "Years": [2019, 2020, 2021, 2022],
+    "Acceleration": 5.1,
+    "TopSpeed": 180,
+    "Range": 370,
+    "Efficiency": 216,
+    "FastChargeSpeed": 440,
+    "Drive": "All Wheel Drive"
   },
   {
     "Maker": "Mercedes-Benz",
@@ -448,7 +568,13 @@ List models = [
   {
     "Maker": "Mercedes-Benz",
     "Model": "EQS",
-    "Years": [2022, 2023]
+    "Years": [2022, 2023],
+    "Acceleration": 6.2,
+    "TopSpeed": 210,
+    "Range": 640,
+    "Efficiency": 168,
+    "FastChargeSpeed": 840,
+    "Drive": "Rear Wheel Drive"
   },
   {
     "Maker": "Mercedes-Benz",
@@ -469,7 +595,13 @@ List models = [
     "Maker": "Mini",
     "Model": "Cooper SE",
     "Years": [2020, 2021, 2022, 2023],
-    "Miles": 0.31
+    "Miles": 0.31,
+    "Acceleration": 7.3,
+    "TopSpeed": 150,
+    "Range": 185,
+    "Efficiency": 156,
+    "FastChargeSpeed": 260,
+    "Drive": "Front Wheel Drive"
   },
   {
     "Maker": "Mini",
@@ -490,7 +622,13 @@ List models = [
   {
     "Maker": "Nissan",
     "Model": "Ariya",
-    "Years": [2022, 2023]
+    "Years": [2022, 2023],
+    "Acceleration": 7.5,
+    "TopSpeed": 160,
+    "Range": 335,
+    "Efficiency": 188,
+    "FastChargeSpeed": 450,
+    "Drive": "Front Wheel Drive"
   },
   {
     "Maker": "Nissan",
@@ -509,12 +647,24 @@ List models = [
       2022,
       2023
     ],
-    "Miles": 0.3
+    "Miles": 0.3,
+    "Acceleration": 7.9,
+    "TopSpeed": 144,
+    "Range": 220,
+    "Efficiency": 164,
+    "FastChargeSpeed": 230,
+    "Drive": "Front Wheel Drive"
   },
   {
     "Maker": "Nissan",
     "Model": "Leaf Plus",
-    "Years": [2019, 2020, 2021, 2022, 2023]
+    "Years": [2019, 2020, 2021, 2022, 2023],
+    "Acceleration": 7.3,
+    "TopSpeed": 157,
+    "Range": 325,
+    "Efficiency": 172,
+    "FastChargeSpeed": 390,
+    "Drive": "Front Wheel Drive"
   },
   {
     "Maker": "Polestar",
@@ -525,7 +675,13 @@ List models = [
     "Maker": "Polestar",
     "Model": "Polestar 2",
     "Years": [2020, 2021, 2022, 2023],
-    "Miles": 0.37
+    "Miles": 0.37,
+    "Acceleration": 7.4,
+    "TopSpeed": 160,
+    "Range": 350,
+    "Efficiency": 174,
+    "FastChargeSpeed": 450,
+    "Drive": "Front Wheel Drive"
   },
   {
     "Maker": "Porsche",
@@ -551,7 +707,13 @@ List models = [
     "Maker": "Porsche",
     "Model": "Taycan EV",
     "Years": [2020, 2021, 2022, 2023],
-    "Miles": 0.41
+    "Miles": 0.41,
+    "Acceleration": 5.4,
+    "TopSpeed": 230,
+    "Range": 395,
+    "Efficiency": 180,
+    "FastChargeSpeed": 790,
+    "Drive": "Rear Wheel Drive"
   },
   {
     "Maker": "Rivian",
@@ -567,7 +729,13 @@ List models = [
     "Maker": "Smart",
     "Model": "Fortwo Electric Drive",
     "Years": [2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021],
-    "Miles": 0.32
+    "Miles": 0.32,
+    "Acceleration": 11.6,
+    "TopSpeed": 130,
+    "Range": 100,
+    "Efficiency": 167,
+    "FastChargeSpeed": null,
+    "Drive": "Rear Wheel Drive"
   },
   {
     "Maker": "Subaru",
@@ -582,7 +750,13 @@ List models = [
   {
     "Maker": "Tesla",
     "Model": "CyberTruck",
-    "Years": [2022]
+    "Years": [2022],
+    "Acceleration": 9.7,
+    "TopSpeed": 140,
+    "Range": 170,
+    "Efficiency": 176,
+    "FastChargeSpeed": 180,
+    "Drive": "Front Wheel Drive"
   },
   {
     "Maker": "Tesla",
@@ -618,13 +792,25 @@ List models = [
     "Maker": "Tesla",
     "Model": "Model Y Long Range",
     "Years": [2020, 2021, 2022, 2023],
-    "Miles": 0.28
+    "Miles": 0.28,
+    "Acceleration": 5.1,
+    "TopSpeed": 217,
+    "Range": 450,
+    "Efficiency": 169,
+    "FastChargeSpeed": 750,
+    "Drive": "All Wheel Drive"
   },
   {
     "Maker": "Tesla",
     "Model": "Model Y Performance Long Range",
     "Years": [2020, 2021, 2022, 2023],
-    "Miles": 0.3
+    "Miles": 0.3,
+    "Acceleration": 3.7,
+    "TopSpeed": 241,
+    "Range": 430,
+    "Efficiency": 177,
+    "FastChargeSpeed": 720,
+    "Drive": "All Wheel Drive"
   },
   {
     "Maker": "Toyota",
@@ -666,7 +852,13 @@ List models = [
     "Maker": "Volkswagen",
     "Model": "ID.4 (Pro)",
     "Years": [2020, 2021, 2022, 2023],
-    "Miles": 0.34
+    "Miles": 0.34,
+    "Acceleration": 8.5,
+    "TopSpeed": 160,
+    "Range": 410,
+    "Efficiency": 188,
+    "FastChargeSpeed": 500,
+    "Drive": "Rear Wheel Drive"
   },
   {
     "Maker": "Volvo",
@@ -687,7 +879,13 @@ List models = [
     "Maker": "Volvo",
     "Model": "XC40",
     "Years": [2020, 2021, 2022, 2023],
-    "Miles": 0.43
+    "Miles": 0.43,
+    "Acceleration": 4.9,
+    "TopSpeed": 180,
+    "Range": 340,
+    "Efficiency": 221,
+    "FastChargeSpeed": 440,
+    "Drive": "All Wheel Drive"
   },
   {
     "Maker": "Volvo",

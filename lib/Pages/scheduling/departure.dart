@@ -102,22 +102,27 @@ class _departureWidgetState extends State<departureWidget>
       setTimes.clear();
     });
     saveScheduleTime(setTimes);
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(
-        "All times cleared.",
-        style: smallTexts,
-      ),
-      backgroundColor: Colors.blue,
-      dismissDirection: DismissDirection.down,
-      elevation: 10,
-    ));
+    showSnackBar(context, "All times cleared.");
   }
 
   void setScheduleTime() {
+    var dayString = '';
     // convert day to day index
-    for (var i = 0; i < setTimes.length; i++) {
-      for (var j = 0; j < setTimes[i]['selectedDays'].length; i++) {}
+    for (var index = 0; index < setTimes.length; index++) {
+      var minutes =
+          setTimes[index]['time'].hour * 60 + setTimes[index]['time'].minute;
+      for (var j = 0; j < setTimes[index]['selectedDays'].length; j++) {
+        if (setTimes[index]['selectedDays'][j]['values']) {
+          var dayScheduled =
+              j.toString() + "_" + minutes.toString() + "_" + "10";
+
+          dayString +=
+              dayString.length != 0 ? ";" + dayScheduled : dayScheduled;
+        }
+      }
     }
+
+    print(dayString);
   }
 
   void departList(addedTime) {
@@ -249,6 +254,10 @@ class _scheduleConfigState extends State<scheduleConfig> {
   final List _selectedIndexs = [
     {
       "values": false,
+      "text": "Sun",
+    },
+    {
+      "values": false,
       "text": "Mon",
     },
     {
@@ -270,10 +279,6 @@ class _scheduleConfigState extends State<scheduleConfig> {
     {
       "values": false,
       "text": "Sat",
-    },
-    {
-      "values": false,
-      "text": "Sun",
     }
   ];
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../helpers/constant.dart';
+import '../../helpers/utils.dart';
 
 class editPersonalInfo extends StatefulWidget {
   const editPersonalInfo({Key? key}) : super(key: key);
@@ -141,11 +142,8 @@ class _editPersonalInfoState extends State<editPersonalInfo> {
                                   child: ElevatedButton(
                                       onPressed: () => {
                                             // API call here to save the data
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(SnackBar(
-                                              content:
-                                                  Text("Profile Updated!!"),
-                                            )),
+                                            showSnackBar(
+                                                context, "Profile Updated"),
                                             Navigator.of(context).pop()
                                           },
                                       child: const Text("Save")),

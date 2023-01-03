@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:soneilcharging/helpers/constant.dart';
 
+import '../../helpers/utils.dart';
+
 class calculateWidget extends StatefulWidget {
   const calculateWidget({Key? key}) : super(key: key);
 
@@ -91,10 +93,7 @@ class _calculateWidgetState extends State<calculateWidget> {
                               _formKey.currentState?.save();
                               // If the form is valid, display a snackbar. In the real world,
                               // you'd often call a server or save the information in a database.
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text('Processing Data')),
-                              );
+                              showSnackBar(context, 'Processing Data');
                             }
                           },
                           child: const Text('Calculate'),
