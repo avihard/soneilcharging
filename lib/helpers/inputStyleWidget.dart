@@ -12,7 +12,7 @@ Widget labelAndValue(label, value) {
 }
 
 // this widget displays label and input field in column type.
-Widget carInfoBoxes(label, controller) {
+Widget carInfoBoxes(label, controller, [String subText = ""]) {
   return Container(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -22,6 +22,11 @@ Widget carInfoBoxes(label, controller) {
           label,
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        if (subText.length != 0)
+          Text(
+            subText,
+            style: TextStyle(color: Colors.grey, fontSize: 14),
+          ),
         TextFormField(
           controller: controller,
           decoration: InputDecoration(

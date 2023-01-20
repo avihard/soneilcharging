@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:soneilcharging/Pages/settings/addedVehiclesList.dart';
+import 'package:soneilcharging/Pages/settings/setTimingHours.dart';
 import '../../helpers/constant.dart';
 import '../../helpers/utils.dart';
 import 'deviceSettings.dart';
@@ -62,7 +63,7 @@ class _settingWidgetState extends State<settingWidget> {
           SizedBox(
             height: 20,
           ),
-          Align(heightFactor: 2, child: personalInfoWidget())
+          Align(heightFactor: 1.5, child: personalInfoWidget())
           /* Text(counter.toString()),
           ElevatedButton(
               child: const Text("Press me"),
@@ -248,7 +249,7 @@ class _DeviceSettingWidgetState extends State<DeviceSettingWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.only(top: 8.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,13 +264,13 @@ class _DeviceSettingWidgetState extends State<DeviceSettingWidget> {
             thickness: 1,
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 8, bottom: 8),
+            padding: const EdgeInsets.only(top: 4, bottom: 8),
             child: InkWell(
               onTap: () {
                 Navigator.of(context).push(createRoute(DeviceInfoWidget()));
               },
               child: Container(
-                height: 40,
+                height: 30,
                 width: MediaQuery.of(context).size.width,
                 child: const Align(
                   alignment: Alignment.centerLeft,
@@ -282,7 +283,7 @@ class _DeviceSettingWidgetState extends State<DeviceSettingWidget> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 0, bottom: 8),
+            padding: const EdgeInsets.only(top: 4, bottom: 8),
             child: InkWell(
               onTap: () {
                 Navigator.of(context)
@@ -295,6 +296,25 @@ class _DeviceSettingWidgetState extends State<DeviceSettingWidget> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Added Vehicles',
+                    style: TextStyle(fontSize: 16.0),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 4, bottom: 8),
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).push(createRoute(TimingHrsWidget()));
+              },
+              child: Container(
+                height: 20,
+                width: MediaQuery.of(context).size.width,
+                child: const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Set Charging Times',
                     style: TextStyle(fontSize: 16.0),
                   ),
                 ),

@@ -25,6 +25,7 @@ class _selectedCarInformationWidgetState
 
   // all fields controller
   TextEditingController nameController = TextEditingController();
+  TextEditingController valueController = TextEditingController();
   TextEditingController accelerateController = TextEditingController();
   TextEditingController speedController = TextEditingController();
   TextEditingController rangeController = TextEditingController();
@@ -86,6 +87,7 @@ class _selectedCarInformationWidgetState
 
   Future editItem(context) {
     nameController.text = widget.carInfo["carName"];
+    valueController.text = widget.carInfo["Miles"];
     accelerateController.text = widget.carInfo["Acceleration"];
     speedController.text = widget.carInfo["TopSpeed"];
     rangeController.text = widget.carInfo["Driving Range"];
@@ -130,6 +132,11 @@ class _selectedCarInformationWidgetState
                 child: Column(
                   children: [
                     carInfoBoxes("Car Name", nameController),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    carInfoBoxes("KWH Per Mile", valueController,
+                        "e.g. 2022 Tesla Model 3 has 0.25 kwh per mile"),
                     SizedBox(
                       height: 10,
                     ),
@@ -218,7 +225,7 @@ class _selectedCarInformationWidgetState
         carInfoRow("Maker", widget.carInfo["Maker"]),
         carInfoRow("Model", widget.carInfo["Model"]),
         carInfoRow("Year", widget.carInfo["Year"]),
-        //carInfoRow("Miles", widget.carInfo["Miles"]),
+        carInfoRow("Miles", widget.carInfo["Miles"]),
         carInfoRow("carName", widget.carInfo["carName"]),
         carInfoRow("Acceleration", widget.carInfo["Acceleration"]),
         carInfoRow("TopSpeed", widget.carInfo["TopSpeed"]),

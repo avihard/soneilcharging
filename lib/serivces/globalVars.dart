@@ -5,7 +5,7 @@ class globalVars {
 
   late var _currentBatteryLevel = 0;
   late var _targetBatteryLevel = 0;
-  late double _currentLevel = 0;
+  late double _currentLevel = 10.0;
   late double _voltLevel = 110.00;
   late var _batteryCapacity = 0;
   late bool _isEcoCharging = true;

@@ -40,13 +40,16 @@ class _DeviceInfoWidgetState extends State<DeviceInfoWidget> {
                       ),
                     ),
                   ),
-                  Text(
-                    "Device Settings",
-                    style: headTexts,
-                  )
+                  Expanded(
+                    child: Text(
+                      "Device Settings",
+                      style: headTexts,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 ],
               ),
-              chargerInfoWidget()
+              const chargerInfoWidget()
             ]),
           ),
         ),
@@ -63,8 +66,13 @@ class chargerInfoWidget extends StatefulWidget {
 }
 
 class _chargerInfoWidgetState extends State<chargerInfoWidget> {
+  TextEditingController nameController = TextEditingController();
+  TextEditingController versionController = TextEditingController();
+  TextEditingController maxChargeController =
+      TextEditingController(text: "32.0");
+
   // common widget to display label and the textbox
-  Widget showLabelandText(label) {
+  Widget showLabelandText(label, controller) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,7 +86,28 @@ class _chargerInfoWidgetState extends State<chargerInfoWidget> {
           height: 10,
         ),
         TextFormField(
-          initialValue: "dev1ceee",
+          controller: controller,
+          /* decoration: InputDecoration(
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15.0),
+              borderSide: const BorderSide(
+                color: Colors.blue,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(15.0),
+              borderSide: const BorderSide(
+                color: Colors.grey,
+                width: 1.0,
+              ),
+            ),
+          ), */
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter some text.';
+            }
+            return null;
+          },
         ),
       ],
     );
@@ -91,15 +120,15 @@ class _chargerInfoWidgetState extends State<chargerInfoWidget> {
       child: Form(
         child: Column(
           children: [
-            showLabelandText("Charger Name"),
+            showLabelandText("Charger Name", nameController),
             SizedBox(
               height: 20,
             ),
-            showLabelandText("Charger Version"),
+            showLabelandText("Charger Version", versionController),
             SizedBox(
               height: 10,
             ),
-            showLabelandText("Maximum Charging rate"),
+            showLabelandText("Maximum Charging rate", maxChargeController),
             SizedBox(
               height: 10,
             ),
