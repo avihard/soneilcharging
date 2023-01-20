@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import '../../helpers/SnapSlider.dart';
 import '../../helpers/constant.dart';
 import '../../helpers/utils.dart';
 
@@ -25,6 +26,7 @@ void saveScheduleTime(setTimes) {
             'selectedDays': e['selectedDays'],
             'label': e['label'],
             'maxHrs': e['maxHrs'],
+            'current': e['current'],
             'time': DateTime(now.year, now.month, now.day, e['time'].hour,
                     e['time'].minute)
                 .toIso8601String()
@@ -73,6 +75,7 @@ class _departureWidgetState extends State<departureWidget>
               'selectedDays': e['selectedDays'],
               'label': e['label'],
               'maxHrs': e['maxHrs'],
+              'current': e['current'],
               'time': TimeOfDay(
                   hour: DateTime.parse(e['time']).hour,
                   minute: DateTime.parse(e['time']).minute)
@@ -105,7 +108,7 @@ class _departureWidgetState extends State<departureWidget>
     showSnackBar(context, "All times cleared.");
   }
 
-  void setScheduleTime() {
+  String setScheduleTime() {
     var dayString = '';
     // convert day to day index
     for (var index = 0; index < setTimes.length; index++) {
@@ -122,7 +125,22 @@ class _departureWidgetState extends State<departureWidget>
       }
     }
 
-    print(dayString);
+    return dayString;
+  }
+
+  String createJsonData(addedTime) {
+    String scheduleString = setScheduleTime();
+
+    var data = {
+      'ScheduleTime': scheduleString,
+      'TimeZone': addedTime['timeZone']
+    };
+
+    // API call here
+    // create data in format
+    String dataString = jsonEncode(data);
+
+    return dataString;
   }
 
   void departList(addedTime) {
@@ -133,7 +151,7 @@ class _departureWidgetState extends State<departureWidget>
 
     // API call here
     // create data in format
-    setScheduleTime();
+    String dataString = createJsonData(addedTime);
 
     saveScheduleTime(setTimes);
   }
@@ -145,10 +163,15 @@ class _departureWidgetState extends State<departureWidget>
     saveScheduleTime(setTimes);
   }
 
-  void saveElement() {
+  void saveElement(addedTime) {
     setState(() {
       isAdded = true;
     });
+
+    // API call here
+    // create data in format
+    String dataString = createJsonData(addedTime);
+
     saveScheduleTime(setTimes);
   }
 
@@ -251,6 +274,9 @@ class _scheduleConfigState extends State<scheduleConfig> {
 
   Map<String, dynamic> currentTime = {};
 
+  Key sliderKey = const Key("scheduleKey");
+  double _currvalue = 32.0;
+
   final List _selectedIndexs = [
     {
       "values": false,
@@ -294,6 +320,12 @@ class _scheduleConfigState extends State<scheduleConfig> {
     }
   }
 
+  void slideUpdateValue(value) {
+    setState(() {
+      _currvalue = value;
+    });
+  }
+
   Widget weekCheckboxes(elem) {
     return Container(
       width: 50,
@@ -328,6 +360,7 @@ class _scheduleConfigState extends State<scheduleConfig> {
       child: Column(
         children: [
           ExpansionTile(
+            key: GlobalKey(),
             title: const Text("Departure Time"),
             trailing: Text(_time.format(context)),
             onExpansionChanged: (value) {
@@ -342,13 +375,24 @@ class _scheduleConfigState extends State<scheduleConfig> {
                   ]),
               Padding(
                 padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                child: TextField(
+                child: SnapSlider(
+                  sliderKey: sliderKey,
+                  snapValues: {10.0, 16.0, 20.0, 24.0, 32.0},
+                  value: _currvalue,
+                  min: 10.0,
+                  max: 32.0,
+                  label: "Current",
+                  textColor: Colors.white,
+                  activeColor: Colors.white,
+                  isArrows: false,
+                  updateValue: slideUpdateValue,
+                ), /* TextField(
                   controller: maxHrs,
                   decoration: const InputDecoration(
                     hintText: 'Max charging hours.',
                     labelText: 'Max Charge Hours',
                   ),
-                ),
+                ) */
               ),
               Padding(
                 padding: const EdgeInsets.only(left: 16.0, right: 16.0),
@@ -374,12 +418,15 @@ class _scheduleConfigState extends State<scheduleConfig> {
                               'id': UniqueKey().hashCode,
                               'time': _time,
                               'selectedDays': _selectedIndexs,
-                              'maxHrs': maxHrs.text.isNotEmpty
+                              'maxHrs': /* maxHrs.text.isNotEmpty
                                   ? double.parse(maxHrs.text)
-                                  : 10.0,
+                                  :  */
+                                  10.0,
+                              'current': _currvalue,
                               'label': depLabel.text.isNotEmpty
                                   ? depLabel.text
                                   : "Departure",
+                              //'timeZone': DateTime.now().timeZoneName
                             }),
                             widget.notifyParent(currentTime)
                           },
@@ -399,7 +446,7 @@ class setDepartureWidget extends StatefulWidget {
   final List setTimes;
   final Function() notifyParent;
   final Function(dynamic) deleteElement;
-  final Function() saveElement;
+  final Function(Map) saveElement;
   const setDepartureWidget(
       {Key? key,
       required this.setTimes,
@@ -536,13 +583,27 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
                   const SizedBox(
                     height: 5,
                   ),
-                  TextField(
+                  SnapSlider(
+                      snapValues: {10, 16, 20, 24, 32},
+                      value: widget.setTimes[index]['current'],
+                      min: 10.0,
+                      max: 32.0,
+                      label: "Current",
+                      textColor: Colors.white,
+                      activeColor: Colors.white,
+                      isArrows: false,
+                      updateValue: (value) {
+                        setState(() {
+                          widget.setTimes[index]['current'] = value;
+                        });
+                      }),
+                  /* TextField(
                     controller: textControllers[index],
                     decoration: const InputDecoration(
                       hintText: 'Max charging hours.',
                       labelText: 'Max Charge Hours',
                     ),
-                  ),
+                  ), */
                   SizedBox(
                     height: 20,
                   ),
@@ -553,9 +614,8 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
                         onPressed: () {
                           widget.setTimes[index]['maxHrs'] =
                               textControllers[index].text;
-                          print(widget.setTimes[index]);
                           // here we will call API to save the data
-                          widget.saveElement();
+                          widget.saveElement(widget.setTimes[index]);
                         },
                         child: const Text("Save"),
                       ),

@@ -2,65 +2,96 @@ import 'dart:io';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import '../helpers/SnapSlider.dart';
 import '../helpers/constant.dart';
 import '../serivces/globalVars.dart';
+
+enum ChargingMode {
+  Immediately,
+  Scheduled,
+  Disabled,
+}
 
 class myProfileWidget extends StatelessWidget {
   final GlobalKey<_chargeSettingWidgetState> _myWidgetState =
       GlobalKey<_chargeSettingWidgetState>();
   myProfileWidget({Key? key}) : super(key: key);
 
-  Widget resetChargingButton() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        primary: Colors.blue.shade800,
-        minimumSize: const Size.fromHeight(50), // NEW
-        elevation: 10,
+  Widget saveChargingButton() {
+    return Container(
+      width: 120,
+      height: 50,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          primary: Colors.blue.shade800,
+          minimumSize: const Size.fromHeight(50), // NEW
+          elevation: 2,
+        ),
+        onPressed: () {
+          _myWidgetState.currentState?.saveSettings();
+        },
+        child: const Text(
+          'Save Settings',
+          style: TextStyle(fontSize: 14),
+        ),
       ),
-      onPressed: () {
-        _myWidgetState.currentState?.resetSettings();
-      },
-      child: const Text(
-        'Reset to Default',
-        style: TextStyle(fontSize: 16),
+    );
+  }
+
+  Widget resetChargingButton() {
+    return Container(
+      width: 140,
+      height: 50,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          primary: Colors.transparent,
+          minimumSize: const Size.fromHeight(50), // NEW
+          elevation: 2,
+        ),
+        onPressed: () {
+          _myWidgetState.currentState?.resetSettings();
+        },
+        child: const Text(
+          'Reset to Default',
+          style: TextStyle(fontSize: 14),
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return SafeArea(
+        child: SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Configuration",
-                style: headerText,
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              const Divider(
-                thickness: 1,
-                height: 30,
-                color: Colors.white,
-              ),
-              chargeSettingWidget(key: _myWidgetState),
-              const SizedBox(
-                height: 20,
-              ),
-              Align(
-                alignment: FractionalOffset.bottomCenter,
-                child: resetChargingButton(),
-              ),
-            ],
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Configuration",
+              style: headerText,
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            const Divider(
+              thickness: 1,
+              height: 30,
+              color: Colors.white,
+            ),
+            chargeSettingWidget(key: _myWidgetState),
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [saveChargingButton(), resetChargingButton()],
+            )
+          ],
         ),
       ),
-    );
+    ));
   }
 }
 
@@ -84,6 +115,15 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
 
   bool isAutoStart = true;
   bool isEcoCharging = true;
+  bool isScheduleCharge = false;
+  bool isDisabled = false;
+
+  Key sliderKey = new Key("sliderKey");
+
+  void saveSettings() {
+    print("aaa");
+    // API Call here to save all the settings
+  }
 
   // this funtion resets the settings
   void resetSettings() {
@@ -149,6 +189,12 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
       Navigator.pop(context);
     }
 
+    void slideUpdateValue(value) {
+      setState(() {
+        _currvalue = value;
+      });
+    }
+
     return BottomSheet(
         enableDrag: false,
         onClosing: () {},
@@ -172,8 +218,17 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
                     ),
                     Column(
                       children: [
+                        SnapSlider(
+                          sliderKey: sliderKey,
+                          snapValues: {10.0, 16.0, 20.0, 24.0, 32.0},
+                          value: _currvalue,
+                          min: 10.0,
+                          max: 32.0,
+                          label: "Current",
+                          updateValue: slideUpdateValue,
+                        ),
                         // Current Block
-                        Row(
+                        /* Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
@@ -215,9 +270,9 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
                               style: modelText,
                             )
                           ],
-                        ),
+                        ), */
                         // Charging Block
-                        Row(
+                        /* Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
@@ -302,7 +357,7 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
                               style: modelText,
                             )
                           ],
-                        ),
+                        ), */
                         modalButtons(updateValues),
                       ],
                     )
@@ -328,6 +383,30 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
         ),
       ],
     );
+  }
+
+  void setChargingMode(value, modeValue) {
+    isAutoStart = false;
+    isScheduleCharge = false;
+    isDisabled = false;
+    switch (modeValue) {
+      case ChargingMode.Immediately:
+        setState(() {
+          isAutoStart = value;
+        });
+        break;
+      case ChargingMode.Scheduled:
+        setState(() {
+          isScheduleCharge = value;
+        });
+        break;
+      case ChargingMode.Disabled:
+        setState(() {
+          isDisabled = value;
+        });
+        break;
+      default:
+    }
   }
 
   @override
@@ -375,14 +454,14 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
             height: 20,
           ),
           chargeSettingRow("Voltage", voltValue.toString()),
-          const Divider(
+          /* const Divider(
             height: 20,
             color: Colors.grey,
-          ),
+          ), */
           const SizedBox(
             height: 20,
           ),
-          chargeSettingRow("Max Charge", maxCharging.toString()),
+          // chargeSettingRow("Max Charge", maxCharging.toString()),
           SizedBox(
             height: 30,
           ),
@@ -398,15 +477,55 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
                 activeColor: Colors.blue.shade800,
                 value: isAutoStart,
                 onChanged: (value) => {
-                  setState(
-                    () => {isAutoStart = value},
-                  ),
+                  setChargingMode(value, ChargingMode.Immediately),
                 },
               ),
             ],
           ),
           const Text(
             "Enabling Autostart will start the charging as soon as you plug the charger to the car.",
+            style: TextStyle(color: Colors.grey),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Charge on Schedule",
+                style: tableTitle,
+                textAlign: TextAlign.start,
+              ),
+              Switch(
+                activeColor: Colors.blue.shade800,
+                value: isScheduleCharge,
+                onChanged: (value) => {
+                  setChargingMode(value, ChargingMode.Scheduled),
+                },
+              ),
+            ],
+          ),
+          const Text(
+            "Enabling this will make sure that, your charging is only happening when you have scheduled in 'schedule charging' page.",
+            style: TextStyle(color: Colors.grey),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Disable Charging",
+                style: tableTitle,
+                textAlign: TextAlign.start,
+              ),
+              Switch(
+                activeColor: Colors.blue.shade800,
+                value: isDisabled,
+                onChanged: (value) => {
+                  setChargingMode(value, ChargingMode.Disabled),
+                },
+              ),
+            ],
+          ),
+          const Text(
+            "This will disable all the charging, charging won't start even on your scheduled time if this is turned on.",
             style: TextStyle(color: Colors.grey),
           ),
           Row(

@@ -100,6 +100,7 @@ class _addVehicleState extends State<addVehicle> {
               onChanged: (value) {
                 setState(() {
                   selectedYear = 0;
+                  carMileValue = 0;
                   _carModel = value;
                 });
               }),
@@ -123,7 +124,12 @@ class _addVehicleState extends State<addVehicle> {
       ),
       onTap: () => {
         setState(
-          () => {selectedYear = item, isError = false, errorMsg = ''},
+          () => {
+            selectedYear = item,
+            isError = false,
+            errorMsg = '',
+            carMileValue = 0
+          },
         )
       },
     );
@@ -165,13 +171,6 @@ class _addVehicleState extends State<addVehicle> {
             SizedBox(
               height: 10,
             ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              const Text("Electricty per mile?"),
-              createInputBox(200.0, valueController)
-            ],
-          )
         ],
       ),
     );
@@ -188,7 +187,7 @@ class _addVehicleState extends State<addVehicle> {
       'Maker': brands[selectedIndex],
       'Model': _carModel,
       'Year': selectedYear.toString(),
-      "Miles": carMileValue,
+      "Miles": valueController.text,
       "carName": nameController.text,
       "Acceleration": accelerateController.text,
       "TopSpeed": speedController.text,
@@ -236,7 +235,7 @@ class _addVehicleState extends State<addVehicle> {
   bool checkCarMileValue() {
     String idString =
         brands[selectedIndex] + "_" + _carModel + "_" + selectedYear.toString();
-    if (carMiles[idString] != null || yearArr[0].length > 3) {
+    if (carMiles[idString] != null || yearArr[0].length > 9) {
       carMileValue =
           carMiles[idString] != null ? carMiles[idString] : yearArr[0]['Miles'];
       return true;
@@ -259,6 +258,8 @@ class _addVehicleState extends State<addVehicle> {
     fastChargeController.text = yearArr[0]["FastChargeSpeed"] != null
         ? yearArr[0]["FastChargeSpeed"].toString()
         : "";
+
+    valueController.text = carMileValue != 0 ? carMileValue.toString() : "";
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -296,7 +297,13 @@ class _addVehicleState extends State<addVehicle> {
                 key: _popupFormKey,
                 child: Column(
                   children: [
-                    carInfoBoxes("Give your vehicle a Name", nameController),
+                    carInfoBoxes(
+                        "Give your vehicle a Name (optional)", nameController),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    carInfoBoxes("KWH per mile", valueController,
+                        "e.g. 2022 Tesla Model 3 has 0.25 kwh per mile"),
                     SizedBox(
                       height: 10,
                     ),

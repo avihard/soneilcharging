@@ -70,3 +70,55 @@ TextStyle modelSubHeader = const TextStyle(
 
 TextStyle modelText = const TextStyle(
     color: Colors.black, fontSize: 16.0, fontWeight: FontWeight.bold);
+
+// charging time for winter
+Map<String, Map> electricityPrice = {
+  "offPeak": {
+    "id": "Off Peak",
+    "startTime": 19.0,
+    "endTime": 7.0,
+    "previousTime": 17.0,
+    "nextTime": 11.0,
+    "price": 7.4,
+    "totalTime": 12.0,
+    "nextPeak": "onPeakMorning",
+    "startLabel": "7 PM",
+    "endLabel": "7 AM"
+  },
+  "midPeak": {
+    "id": "Mid Peak",
+    "startTime": 11.0,
+    "endTime": 17.0,
+    "previousTime": 7.0,
+    "nextTime": 19.0,
+    "price": 10.2,
+    "totalTime": 6.0,
+    "nextPeak": "onPeakEvening",
+    "startLabel": "11 AM",
+    "endLabel": "5 PM"
+  },
+  "onPeakMorning": {
+    "id": "On Peak",
+    "startTime": 7.0,
+    "endTime": 11.0,
+    "previousTime": 19.0,
+    "nextTime": 17.0,
+    "price": 15.1,
+    "totalTime": 4.0,
+    "nextPeak": "midPeak",
+    "startLabel": "7 AM",
+    "endLabel": "11 AM"
+  },
+  "onPeakEvening": {
+    "id": "On Peak",
+    "startTime": 17.0,
+    "endTime": 19.0,
+    "previousTime": 11.0,
+    "nextTime": 7.0,
+    "price": 15.1,
+    "totalTime": 2.0,
+    "nextPeak": "offPeak",
+    "startLabel": "5 PM",
+    "endLabel": "7 PM"
+  }
+};

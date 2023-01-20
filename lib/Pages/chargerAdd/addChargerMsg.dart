@@ -4,7 +4,6 @@ import 'package:soneilcharging/helpers/constant.dart';
 import 'package:soneilcharging/index.dart';
 import '../../helpers/utils.dart';
 import '../../serivces/globalVars.dart';
-import '../helpers/constant.dart';
 import 'addChargerPage.dart';
 
 const List<String> list = <String>[
