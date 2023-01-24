@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import '../helpers/SnapSlider.dart';
-import '../helpers/constant.dart';
-import '../serivces/globalVars.dart';
+import 'package:soneilcharging/Pages/configuration/priceSetupWidget.dart';
+import '../../helpers/SnapSlider.dart';
+import '../../helpers/constant.dart';
+import '../../helpers/utils.dart';
+import '../../serivces/globalVars.dart';
 
 enum ChargingMode {
   Immediately,
@@ -83,6 +85,30 @@ class myProfileWidget extends StatelessWidget {
             chargeSettingWidget(key: _myWidgetState),
             const SizedBox(
               height: 20,
+            ),
+            InkWell(
+              child: Container(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Price Setup",
+                        style: smallTexts,
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios_sharp,
+                        size: 16.0,
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              onTap: () => {
+                Navigator.of(context)
+                    .push(createRouteAnim(const PriceSetupWidget())),
+              },
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
