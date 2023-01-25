@@ -3,15 +3,12 @@ import 'package:soneilcharging/Pages/settings/settings.dart';
 
 // functional widgets
 import 'Pages/home.dart';
-import 'Pages/configuration.dart';
+import 'Pages/configuration/configuration.dart';
 import 'Pages/scheduling/schedule.dart';
-import 'functions/chargerData.dart';
 
 // welcome page
-import 'Authorization/login.dart';
 
 // navigation
-import 'Router/Navigation.dart';
 
 class indexWidget extends StatefulWidget {
   const indexWidget({Key? key}) : super(key: key);
@@ -92,7 +89,7 @@ class _indexWidgetState extends State<indexWidget> {
           HomeWidget(
             onButtonPressed: () => pageController.animateToPage(
               1,
-              duration: Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 300),
               curve: Curves.linear,
             ),
           ),
