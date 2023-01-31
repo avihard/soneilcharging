@@ -5,16 +5,6 @@ import '../../helpers/SnapSlider.dart';
 import '../../helpers/constant.dart';
 import '../../helpers/utils.dart';
 
-var daysMap = {
-  "Sun": 0,
-  "Mon": 1,
-  "Tue": 2,
-  "Wed": 3,
-  "Thur": 4,
-  "Fri": 5,
-  "Sat": 6
-};
-
 //saving into the local file of the device
 void saveScheduleTime(setTimes) {
   List tempSetTimes = [];
