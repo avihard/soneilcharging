@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import '../../Animation/FunkyAnimation.dart';
 import '../../helpers/SnapSlider.dart';
 import '../../helpers/constant.dart';
 import '../../helpers/utils.dart';
@@ -13,8 +15,9 @@ void saveScheduleTime(setTimes) {
   tempSetTimes = setTimes
       .map((e) => {
             "id": e['id'],
-            'selectedDays': e['selectedDays'],
+            //'selectedDays': e['selectedDays'],
             'label': e['label'],
+            'date': e['date'],
             'maxHrs': e['maxHrs'],
             'current': e['current'],
             'time': DateTime(now.year, now.month, now.day, e['time'].hour,
@@ -62,7 +65,8 @@ class _departureWidgetState extends State<departureWidget>
     tempList = tempList
         .map((e) => {
               "id": e['id'],
-              'selectedDays': e['selectedDays'],
+              //'selectedDays': e['selectedDays'],
+              'date': e['date'],
               'label': e['label'],
               'maxHrs': e['maxHrs'],
               'current': e['current'],
@@ -134,16 +138,42 @@ class _departureWidgetState extends State<departureWidget>
   }
 
   void departList(addedTime) {
-    setState(() {
-      isAdded = true;
-      setTimes.add(addedTime);
-    });
+    var isConflicting = false;
+    // get all the elements of the same date which has been already scheduled previously.
+    var checkTimes = setTimes.where(
+      (element) {
+        return element['date'] == addedTime['date'];
+      },
+    );
 
-    // API call here
-    // create data in format
-    String dataString = createJsonData(addedTime);
+    for (var element in checkTimes) {
+      var setMinutes = element['time'].hour * 60 + element['time'].minute;
+      var toSetMinutes = addedTime['time'].hour * 60 + addedTime['time'].minute;
 
-    saveScheduleTime(setTimes);
+      if (setMinutes == toSetMinutes) {
+        isConflicting = true;
+        FunkyNotification(
+            error:
+                "Your time is matching exactly with some other scheduled time.");
+      } else if ((setMinutes - 30) <= toSetMinutes &&
+          toSetMinutes <= (setMinutes + 30)) {
+        isConflicting = true;
+        FunkyNotification(error: "Your time is in range with other time.");
+      }
+    }
+
+    if (!isConflicting) {
+      setState(() {
+        isAdded = true;
+        setTimes.add(addedTime);
+      });
+
+      // API call here
+      // create data in format
+      //String dataString = createJsonData(addedTime);
+
+      saveScheduleTime(setTimes);
+    }
   }
 
   void deleteElement(id) {
@@ -160,7 +190,7 @@ class _departureWidgetState extends State<departureWidget>
 
     // API call here
     // create data in format
-    String dataString = createJsonData(addedTime);
+    // String dataString = createJsonData(addedTime);
 
     saveScheduleTime(setTimes);
   }
@@ -262,6 +292,8 @@ class _scheduleConfigState extends State<scheduleConfig> {
   // max charging hr controller
   TextEditingController maxHrs = new TextEditingController(text: "10");
 
+  TextEditingController dateInput = TextEditingController();
+
   Map<String, dynamic> currentTime = {};
 
   Key sliderKey = const Key("scheduleKey");
@@ -350,19 +382,60 @@ class _scheduleConfigState extends State<scheduleConfig> {
       child: Column(
         children: [
           ExpansionTile(
-            key: GlobalKey(),
             title: const Text("Departure Time"),
             trailing: Text(_time.format(context)),
             onExpansionChanged: (value) {
               return value ? _selectTime() : null;
             },
             children: [
-              Wrap(
+              Padding(
+                padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+                child: TextField(
+                  controller: depLabel,
+                  decoration: const InputDecoration(
+                    hintText: 'Give name to your departure.',
+                    labelText: 'Label',
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  controller: dateInput,
+                  decoration: InputDecoration(
+                      icon: Icon(Icons.calendar_today), //icon of text field
+                      labelText: "Enter Date" //label text of field
+                      ),
+                  readOnly: true,
+                  onTap: () async {
+                    DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime.now(),
+                        //DateTime.now() - not to allow to choose before today.
+                        lastDate: DateTime(2100));
+
+                    if (pickedDate != null) {
+                      print(
+                          pickedDate); //pickedDate output format => 2021-03-10 00:00:00.000
+                      String formattedDate =
+                          DateFormat('yyyy-MM-dd').format(pickedDate);
+                      print(
+                          formattedDate); //formatted date output using intl package =>  2021-03-16
+                      setState(() {
+                        dateInput.text =
+                            formattedDate; //set output date to TextField value.
+                      });
+                    } else {}
+                  },
+                ),
+              ),
+              /* Wrap(
                   alignment: WrapAlignment.center,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: <Widget>[
                     for (var elem in _selectedIndexs) weekCheckboxes(elem)
-                  ]),
+                  ]), */
               Padding(
                 padding: const EdgeInsets.only(left: 16.0, right: 16.0),
                 child: SnapSlider(
@@ -384,16 +457,6 @@ class _scheduleConfigState extends State<scheduleConfig> {
                   ),
                 ) */
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-                child: TextField(
-                  controller: depLabel,
-                  decoration: const InputDecoration(
-                    hintText: 'Give name to your departure.',
-                    labelText: 'Label',
-                  ),
-                ),
-              ),
               const SizedBox(
                 height: 10,
               ),
@@ -407,7 +470,8 @@ class _scheduleConfigState extends State<scheduleConfig> {
                             currentTime.addAll({
                               'id': UniqueKey().hashCode,
                               'time': _time,
-                              'selectedDays': _selectedIndexs,
+                              'date': dateInput.text,
+                              //'selectedDays': _selectedIndexs,
                               'maxHrs': /* maxHrs.text.isNotEmpty
                                   ? double.parse(maxHrs.text)
                                   :  */
@@ -553,7 +617,7 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
             itemCount: widget.setTimes.length,
             itemBuilder: (BuildContext context, int index) {
               textControllers.add(new TextEditingController(
-                  text: widget.setTimes[index]['maxHrs'].toString()));
+                  text: widget.setTimes[index]['date'].toString()));
               return ExpansionTile(
                 //initiallyExpanded: selected,
                 //key: GlobalKey(),
@@ -563,13 +627,44 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
                   return value ? _selectTime(index) : null;
                 },
                 children: [
-                  Wrap(
+                  StatefulBuilder(builder: ((context, setState) {
+                    return TextField(
+                      controller: textControllers[index],
+                      decoration: InputDecoration(
+                          icon: Icon(Icons.calendar_today), //icon of text field
+                          labelText: "Enter Date" //label text of field
+                          ),
+                      readOnly: true,
+                      onTap: () async {
+                        /* DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            initialDate: DateFormat("yyyy-MM-dd")
+                                .parse(textControllers[index].text),
+                            firstDate: DateTime(1950),
+                            //DateTime.now() - not to allow to choose before today.
+                            lastDate: DateTime(2100));
+
+                        if (pickedDate != null) {
+                          print(
+                              pickedDate); //pickedDate output format => 2021-03-10 00:00:00.000
+                          String formattedDate =
+                              DateFormat('yyyy-MM-dd').format(pickedDate);
+                          print(
+                              formattedDate); //formatted date output using intl package =>  2021-03-16
+                          setState(() {
+                            textControllers[index].text = formattedDate;
+                          });
+                        } else {} */
+                      },
+                    );
+                  })),
+                  /* Wrap(
                       alignment: WrapAlignment.center,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: <Widget>[
                         for (var elem in widget.setTimes[index]['selectedDays'])
                           weekCheckboxes(elem)
-                      ]),
+                      ]), */
                   const SizedBox(
                     height: 5,
                   ),
@@ -602,7 +697,7 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          widget.setTimes[index]['maxHrs'] =
+                          widget.setTimes[index]['date'] =
                               textControllers[index].text;
                           // here we will call API to save the data
                           widget.saveElement(widget.setTimes[index]);
