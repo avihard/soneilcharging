@@ -2,7 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:progressive_time_picker/progressive_time_picker.dart';
-import 'package:intl/intl.dart' as intl;
+
+import 'package:soneilcharging/Pages/configuration/commonStyle.dart';
 import '../../helpers/constant.dart';
 import '../../helpers/inputStyleWidget.dart';
 import '../../helpers/utils.dart';
@@ -125,8 +126,7 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
     ];
   }
 
-  void deleteElement(index) {
-    var element = peakList[index];
+  void removeElement(element) {
     for (int i = 0; i < element['selectedDays'].length; i++) {
       var id = element['selectedDays'][i];
       timeList[id]!['startArr']?.remove(element['startFractionTime']);
@@ -140,6 +140,11 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
             ?.removeWhere((timeElement) => timeElement['startTime'] == 0);
       }
     }
+  }
+
+  void deleteElement(index) {
+    var element = peakList[index];
+    removeElement(element);
 
     peakList.removeAt(index);
     peakList.isEmpty ? resetAllVariables() : setState(() {});
@@ -223,7 +228,6 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
         }
       }
     });
-    print("Aaaaa");
     return [isShowGap, timesToAdd];
   }
 
@@ -333,40 +337,6 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
     return showError ? null : returnMap;
   }
 
-  Widget _timeWidget(String title, PickedTime time, [Icon? icon]) {
-    return Container(
-      width: 100.0,
-      decoration: BoxDecoration(
-        color: Color(0xFF1F2633),
-        borderRadius: BorderRadius.circular(25.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            Text(
-              '${intl.NumberFormat('00').format(time.h)}:${intl.NumberFormat('00').format(time.m)}',
-              style: TextStyle(
-                color: Color.fromARGB(255, 70, 170, 190),
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 5),
-            Text(
-              '$title',
-              style: TextStyle(
-                color: Color(0xFF3CDAF7),
-                fontSize: 16,
-              ),
-            ),
-            // icon,
-          ],
-        ),
-      ),
-    );
-  }
-
   /* ################## ALL THE DIALOGUES START ########################*/
 
 // this opens the dialog for
@@ -379,16 +349,8 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
           return AlertDialog(
             scrollable: true,
             insetPadding: EdgeInsets.zero,
-            title: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Set your Prices"),
-                  const Text(
-                    "Enter price for every time phase.",
-                    style: TextStyle(fontSize: 12.0, color: Colors.grey),
-                  ),
-                ]),
+            title: titleWidget(
+                "Set your Prices!", "Enter price for every time phase."),
             content: Container(
               width: MediaQuery.of(context).size.width - 100,
               child: Column(
@@ -406,35 +368,7 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                             width: 260.0,
                             primarySectors: _clockTimeFormat.value ~/ 2,
                             secondarySectors: _clockTimeFormat.value ~/ 2,
-                            decoration: TimePickerDecoration(
-                              baseColor: Color(0xFF1F2633),
-                              sweepDecoration: TimePickerSweepDecoration(
-                                pickerStrokeWidth: 15.0,
-                                pickerColor: Color(0xFF3CDAF7),
-                                showConnector: true,
-                              ),
-                              initHandlerDecoration:
-                                  TimePickerHandlerDecoration(
-                                color: Color(0xFF141925),
-                                shape: BoxShape.circle,
-                                radius: 12.0,
-                              ),
-                              endHandlerDecoration: TimePickerHandlerDecoration(
-                                color: Color(0xFF141925),
-                                shape: BoxShape.circle,
-                                radius: 12.0,
-                              ),
-                              clockNumberDecoration:
-                                  TimePickerClockNumberDecoration(
-                                defaultTextColor: Colors.white,
-                                defaultFontSize: 12.0,
-                                scaleFactor: 1.0,
-                                showNumberIndicators: true,
-                                clockTimeFormat: _clockTimeFormat,
-                                clockIncrementTimeFormat:
-                                    _clockIncrementTimeFormat,
-                              ),
-                            ),
+                            decoration: timePickerStyle(),
                             onSelectionChange: (startTime, endTime,
                                 [isDisable]) {
                               setState(() => {
@@ -483,7 +417,7 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              _timeWidget(
+                              timeWidget(
                                 'From',
                                 _startTime,
                                 /* Icon(
@@ -492,7 +426,7 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                                 color: Color(0xFF3CDAF7),
                               ), */
                               ),
-                              _timeWidget(
+                              timeWidget(
                                 'To',
                                 _endTime,
                                 /* Icon(
@@ -503,18 +437,7 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                               ),
                             ],
                           ),
-                          if (isError)
-                            Column(
-                              children: [
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                const Text(
-                                  "Time is Conflicting",
-                                  style: TextStyle(color: Colors.red),
-                                )
-                              ],
-                            )
+                          if (isError) showError()
                           /* Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
@@ -719,15 +642,212 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
         });
   }
 
+  // on edit this function removes the already present values in 'timeList' so that we can upgrade those items.
+
+  // this dialog opens up when you click on the container and it is used for editing the information.
+  Future nextEditDialog(context, timeCard) {
+    bool isError = false;
+    nameController = TextEditingController(text: timeCard['peakName']);
+    priceController = TextEditingController(text: timeCard['price']);
+    var startTimeArr = timeCard['startTime'].split(":");
+    _startTime = PickedTime(
+        h: int.parse(startTimeArr[0]), m: int.parse(startTimeArr[1]));
+
+    var endTimeArr = timeCard['endTime'].split(":");
+    _endTime =
+        PickedTime(h: int.parse(endTimeArr[0]), m: int.parse(endTimeArr[1]));
+
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(builder: ((context, setState) {
+          return AlertDialog(
+            scrollable: true,
+            insetPadding: EdgeInsets.zero,
+            title: titleWidget(
+                "Set your Prices!", "Enter price for every time phase."),
+            content: Container(
+              width: MediaQuery.of(context).size.width - 100,
+              child: Column(
+                children: [
+                  //if (showForm)
+                  Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          carInfoBoxes("Name", nameController),
+                          TimePicker(
+                            initTime: _startTime,
+                            endTime: _endTime,
+                            height: 260.0,
+                            width: 260.0,
+                            primarySectors: _clockTimeFormat.value ~/ 2,
+                            secondarySectors: _clockTimeFormat.value ~/ 2,
+                            decoration: timePickerStyle(),
+                            onSelectionChange: (startTime, endTime,
+                                [isDisable]) {
+                              setState(() => {
+                                    _startTime = startTime,
+                                    _endTime = endTime,
+                                    _intervalBedTime = formatIntervalTime(
+                                      init: _startTime,
+                                      end: _endTime,
+                                      clockTimeFormat: _clockTimeFormat,
+                                      clockIncrementTimeFormat:
+                                          _clockIncrementTimeFormat,
+                                    ),
+                                  });
+                            },
+                            onSelectionEnd: (startTime, endTime, [isDisable]) {
+                              setState(() => {
+                                    _startTime = startTime,
+                                    _endTime = endTime,
+                                  });
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(62.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    width: 100,
+                                    child: TextFormField(
+                                      initialValue: timeCard['price'],
+                                      //controller: priceController,
+                                      textAlign: TextAlign.center,
+                                      decoration: InputDecoration(
+                                          hintText: "Add Price (in cents)",
+                                          hintStyle: TextStyle(fontSize: 10)),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter some text.';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              timeWidget(
+                                'From',
+                                _startTime,
+                                /* Icon(
+                                Icons.power_settings_new_outlined,
+                                size: 25.0,
+                                color: Color(0xFF3CDAF7),
+                              ), */
+                              ),
+                              timeWidget(
+                                'To',
+                                _endTime,
+                                /* Icon(
+                                Icons.notifications_active_outlined,
+                                size: 25.0,
+                                color: Color(0xFF3CDAF7),
+                              ), */
+                              ),
+                            ],
+                          ),
+                          if (isError) showError()
+                          /* Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            ElevatedButton(
+                                onPressed: () {}, child: const Text("Add")),
+                            ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    showForm = false;
+                                  });
+                                },
+                                child: const Text("Cancel"))
+                          ],
+                        ) */
+                        ],
+                      )),
+                  /* if (!showForm)
+                    FloatingActionButton(
+                      onPressed: () {
+                        setState(() {
+                          showForm = true;
+                        });
+                      },
+                      child: Icon(Icons.add),
+                    ) */
+                ],
+              ),
+            ),
+            actions: [
+              //if (!showForm)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      editDialog(context, timeCard, false);
+                    },
+                    child: Text("Back"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        removeElement(timeCard);
+                        var returnList = calculateData();
+                        if (returnList != null) {
+                          timeList = returnList['timeList'];
+                          Navigator.of(context).pop();
+                          isError = false;
+                          isAdded = true;
+                          var updatedObj = {
+                            "peakName": nameController.text,
+                            "selectedDays": returnList['selectedDaysIndexes'],
+                            "startTime":
+                                getStringFromHourAndMinutes(_startTime, ":"),
+                            "endTime":
+                                getStringFromHourAndMinutes(_endTime, ":"),
+                            "startFractionTime": double.parse(
+                                getStringFromHourAndMinutes(_startTime, "")),
+                            "endFractionTime": double.parse(
+                                getStringFromHourAndMinutes(_endTime, "")),
+                            "price": priceController.text,
+                            "id": timeCard['id'],
+                          };
+
+                          peakList[peakList.indexWhere((element) =>
+                              element['id'] == timeCard['id'])] = updatedObj;
+
+                          updateState();
+                        } else {
+                          setState(() => {isError = true});
+                        }
+                      }
+                    },
+                    child: Text("Submit"),
+                  )
+                ],
+              )
+            ],
+          );
+        }));
+      },
+    );
+  }
+
   // This is edit dialog lot of the code is common with new dialog so try to take out common part as much as possible
-  Future editDialog(context, selectedCard) {
-    for (int i = 0; i < selectedCard['selectedDays'].length; i++) {
-      _selectedIndexs?.forEach((element) {
-        if (element['id'] == selectedCard['selectedDays'][i]) {
-          element['values'] = true;
-        }
-      });
-    }
+  Future editDialog(context, selectedCard, [isUpdate]) {
+    _selectedIndexs?.forEach((element) {
+      if (selectedCard['selectedDays'].contains(element['id']) && isUpdate) {
+        element['values'] = true;
+      } else if (isUpdate) {
+        element['values'] = false;
+      }
+    });
     return showDialog(
       context: context,
       builder: (context) {
@@ -768,7 +888,7 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                   onPressed: () {
                     _selectedIndexs = weekList;
                     Navigator.of(context).pop();
-                    nextDialog(context);
+                    nextEditDialog(context, selectedCard);
                   },
                   child: Text("Next"),
                 )
@@ -863,7 +983,7 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                             ),
                             title: InkWell(
                               onTap: () {
-                                editDialog(context, peakList[index]);
+                                editDialog(context, peakList[index], true);
                               },
                               child: Text(
                                 peakList[index]['peakName'],
