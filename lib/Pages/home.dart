@@ -5,9 +5,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:battery/battery.dart';
+import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
-import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:intl/intl.dart';
 
 import '../helpers/constant.dart';

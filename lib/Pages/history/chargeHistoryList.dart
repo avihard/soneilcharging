@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'package:intl/intl.dart';
 import '../../helpers/constant.dart';
 import '../../helpers/utils.dart';
@@ -82,7 +82,7 @@ class chargingHistorySelectionWidget extends StatefulWidget {
 
 class _chargingHistorySelectionWidgetState
     extends State<chargingHistorySelectionWidget> {
-  final scrollController = SwiperController();
+  final scrollController = SwiperControl();
   int remainingMonth = 12 - DateTime.now().month;
   int selectedIndex = 0;
   String selectedMonth = '';
@@ -145,7 +145,7 @@ class _chargingHistorySelectionWidgetState
               height: 80,
               decoration: BoxDecoration(color: Colors.black45),
               child: Swiper(
-                controller: scrollController,
+                control: scrollController,
                 viewportFraction: 0.5,
                 itemCount: (months.length - remainingMonth),
                 scrollDirection: Axis.horizontal,
