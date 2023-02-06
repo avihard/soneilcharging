@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:progressive_time_picker/progressive_time_picker.dart';
 
 import 'package:soneilcharging/Pages/configuration/commonStyle.dart';
@@ -28,7 +29,7 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
   TextEditingController priceController = TextEditingController();
 
   PickedTime _startTime = PickedTime(h: 0, m: 0);
-  PickedTime _endTime = PickedTime(h: 8, m: 0);
+  PickedTime _endTime = PickedTime(h: 23, m: 59);
 
   PickedTime _intervalBedTime = PickedTime(h: 0, m: 0);
 
@@ -72,6 +73,10 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
   }
 
   void updateState() {
+    setState(() {});
+  }
+
+  void createSendString() {
     // this block will create the data to send to API
     String priceDayString = '';
 
@@ -92,8 +97,6 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
       }
       priceDayString += key == 0 ? dayString : ":$dayString";
     });
-
-    setState(() {});
   }
 
   resetAllVariables() {
@@ -152,28 +155,19 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
 
   List calculateTimeGap() {
     bool isShowGap = false;
-    Map<dynamic, List> timesToAdd = {
-      0: [],
-      1: [],
-      2: [],
-      3: [],
-      4: [],
-      5: [],
-      6: []
-    };
+    Map<String, dynamic> timesToAdd = {};
     // we are checking if there is any gap between times
     timeList.forEach((key, value) {
       var missingTimeObj = {};
-      if (value['startArr']?.length == 0) {
+      if (value['startArr']?.length == 0 && !isShowGap) {
         isShowGap = true;
-        missingTimeObj = {
+        timesToAdd = {
           "startTime": "00:00",
           "endTime": "23:59",
           "dayKey": key,
           "dayName": daysMap.keys
               .firstWhere((k) => daysMap[k] == key, orElse: () => "")
         };
-        timesToAdd[key]?.add(missingTimeObj);
         return;
       }
       for (int i = 0; i < value['startArr']!.length; i++) {
@@ -182,11 +176,41 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
         var endRounded = (value['endArr']![i] / 100).ceil();
         var startPadded = value['startArr']![index].toString().padLeft(4, "0");
         var endPadded = value['endArr']![i].toString().padLeft(4, "0");
-        if (index != 0) {
-          if ((value['startArr']![index] - value['endArr']![i]) > 1 &&
-              (startRounded - endRounded) == 0) {
+        if (!isShowGap) {
+          if (index != 0) {
+            if ((value['startArr']![index] - value['endArr']![i]) > 1 &&
+                (startRounded - endRounded) == 0) {
+              isShowGap = true;
+              timesToAdd = {
+                "startTime":
+                    "${endPadded.substring(0, 2)}:${endPadded.substring(2, 4)}",
+                "endTime":
+                    "${startPadded.substring(0, 2)}:${startPadded.substring(2, 4)}",
+                "dayKey": key,
+                "dayName": daysMap.keys
+                    .firstWhere((k) => daysMap[k] == key, orElse: () => "")
+              };
+              // timesToAdd[key]?.add(missingTimeObj);
+            }
+            // when the hour is next
+            if ((startRounded - endRounded) > 0 &&
+                (value['startArr']![index] - value['endArr']![i]) > 41) {
+              isShowGap = true;
+              timesToAdd = {
+                "startTime":
+                    "${endPadded.substring(0, 2)}:${endPadded.substring(2, 4)}",
+                "endTime":
+                    "${startPadded.substring(0, 2)}:${startPadded.substring(2, 4)}",
+                "dayKey": key,
+                "dayName": daysMap.keys
+                    .firstWhere((k) => daysMap[k] == key, orElse: () => "")
+              };
+              // timesToAdd[key]?.add(missingTimeObj);
+            }
+          } else if (index == 0 &&
+              (value['startArr']![index] - value['endArr']![i]) > -2359) {
             isShowGap = true;
-            missingTimeObj = {
+            timesToAdd = {
               "startTime":
                   "${endPadded.substring(0, 2)}:${endPadded.substring(2, 4)}",
               "endTime":
@@ -195,36 +219,8 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
               "dayName": daysMap.keys
                   .firstWhere((k) => daysMap[k] == key, orElse: () => "")
             };
-            timesToAdd[key]?.add(missingTimeObj);
+            // timesToAdd[key]?.add(missingTimeObj);
           }
-          // when the hour is next
-          if ((startRounded - endRounded) > 0 &&
-              (value['startArr']![index] - value['endArr']![i]) > 41) {
-            isShowGap = true;
-            missingTimeObj = {
-              "startTime":
-                  "${endPadded.substring(0, 2)}:${endPadded.substring(2, 4)}",
-              "endTime":
-                  "${startPadded.substring(0, 2)}:${startPadded.substring(2, 4)}",
-              "dayKey": key,
-              "dayName": daysMap.keys
-                  .firstWhere((k) => daysMap[k] == key, orElse: () => "")
-            };
-            timesToAdd[key]?.add(missingTimeObj);
-          }
-        } else if (index == 0 &&
-            (value['startArr']![index] - value['endArr']![i]) > -2359) {
-          isShowGap = true;
-          missingTimeObj = {
-            "startTime":
-                "${endPadded.substring(0, 2)}:${endPadded.substring(2, 4)}",
-            "endTime":
-                "${startPadded.substring(0, 2)}:${startPadded.substring(2, 4)}",
-            "dayKey": key,
-            "dayName": daysMap.keys
-                .firstWhere((k) => daysMap[k] == key, orElse: () => "")
-          };
-          timesToAdd[key]?.add(missingTimeObj);
         }
       }
     });
@@ -384,10 +380,13 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                                   });
                             },
                             onSelectionEnd: (startTime, endTime, [isDisable]) {
-                              setState(() => {
-                                    _startTime = startTime,
-                                    _endTime = endTime,
-                                  });
+                              _endTime = endTime.h == 24
+                                  ? PickedTime(h: 23, m: 59)
+                                  : endTime;
+                              _startTime = startTime.h == 24
+                                  ? PickedTime(h: 0, m: 0)
+                                  : startTime;
+                              setState(() => {});
                             },
                             child: Padding(
                               padding: const EdgeInsets.all(62.0),
@@ -576,59 +575,32 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
     );
   }
 
-  Future gapShowDialog(context, gapList) {
+  Future gapShowDialog(context, gapMap) {
     return showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            scrollable: true,
-            insetPadding: EdgeInsets.zero,
             title: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Fill All Times"),
-                  const Text(
-                    "You have not yet set prices for this days and time.",
+                children: const [
+                  Text("Set Price!!"),
+                  Text(
+                    "You have not yet set prices for this day and time.",
                     style: TextStyle(fontSize: 12.0, color: Colors.grey),
                   ),
                 ]),
             content: Container(
               height: 300.0, // Change as per your requirement
               width: 300.0, // Change as per your requirement
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: gapList.length,
-                itemBuilder: (BuildContext context, int index) {
-                  if (gapList[index].length > 0) {
-                    return ExpansionTile(
-                        //initiallyExpanded: selected,
-                        //key: GlobalKey(),
-                        title: Text(gapList[index][0]['dayName']),
-                        children: [
-                          for (int i = 0; i < gapList[index].length; i++)
-                            Row(
-                              children: [
-                                const Text("Between "),
-                                Text(gapList[index][i]['startTime']),
-                                Text(" - "),
-                                Text(gapList[index][i]['endTime']),
-                              ],
-                            ),
-                        ]);
-                  }
-                  return SizedBox.shrink();
-                },
-              ),
+              child: Text(
+                  "${"Please add time for " + gapMap['dayName'] + " between " + gapMap['startTime'] + " and " + gapMap['endTime']}."),
             ),
             actions: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(
-                    height: 10,
-                  ),
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
@@ -901,6 +873,43 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
   }
   /* ###################   END ##################### */
 
+  /* Warning dialog start */
+  Future showWarningDialog(context) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text(
+              "Warning",
+              style: TextStyle(color: Colors.red),
+            ),
+            content: Container(
+                child: const Text(
+                    "Are you sure you want to go back? All your data will be lost.")),
+            actions: [
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("Back"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("Ok"),
+                  ),
+                ],
+              )
+            ],
+          );
+        });
+  }
+  /* Warning dialog End */
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -911,125 +920,138 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
             List gapList = calculateTimeGap();
             if (gapList[0] == true) {
               gapShowDialog(context, gapList[1]);
-            } else {}
+            } else {
+              createSendString();
+            }
           },
           child: const Text("Save"),
           color: Colors.blue,
         ),
         //floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        body: SingleChildScrollView(
-            child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-              child: Row(
-                children: [
-                  InkWell(
-                    hoverColor: Colors.blue,
-                    focusColor: Colors.blue,
-                    child: const Icon(
-                      Icons.keyboard_arrow_left,
-                      size: 32,
-                    ),
-                    onTap: () => {Navigator.pop(context)},
-                  ),
-                  Text(
-                    "Price Setup",
-                    style: headerText,
-                  ),
-                  Flexible(
-                      child: Align(
-                    alignment: Alignment.topRight,
-                    child: InkWell(
+        body: Container(
+          height: MediaQuery.of(context).size.height - 100,
+          child: SingleChildScrollView(
+              child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+                child: Row(
+                  children: [
+                    InkWell(
+                      hoverColor: Colors.blue,
+                      focusColor: Colors.blue,
+                      child: const Icon(
+                        Icons.keyboard_arrow_left,
+                        size: 32,
+                      ),
                       onTap: () {
-                        setState(() {
-                          resetAllVariables();
-                        });
+                        List gapList = calculateTimeGap();
+                        if (gapList[0]) {
+                          showWarningDialog(context);
+                        } else {
+                          Navigator.pop(context);
+                        }
                       },
-                      child: Text(
-                        "Delete All",
-                        style: TextStyle(color: Colors.blue.shade700),
-                      ),
                     ),
-                  ))
-                ],
-              ),
-            ),
-            if (peakList.isNotEmpty)
-              Container(
-                child: ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  itemCount: peakList.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Card(
-                      elevation: 10.0,
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 10.0, vertical: 20.0),
-                      child: Container(
-                        decoration: const BoxDecoration(
-                            color: Color.fromRGBO(64, 75, 96, .9)),
-                        child: ListTile(
-                            selectedTileColor: Colors.blue,
-                            contentPadding: const EdgeInsets.only(left: 20.0),
-                            leading: Container(
-                              padding: const EdgeInsets.only(right: 12.0),
-                              decoration: new BoxDecoration(
-                                  border: new Border(
-                                      right: const BorderSide(
-                                          width: 1.0, color: Colors.white24))),
-                              child: const Icon(Icons.timelapse,
-                                  color: Colors.white),
-                            ),
-                            title: InkWell(
-                              onTap: () {
-                                editDialog(context, peakList[index], true);
-                              },
-                              child: Text(
-                                peakList[index]['peakName'],
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            // subtitle: Text("Intermediate", style: TextStyle(color: Colors.white)),
-
-                            trailing: InkWell(
-                              onTap: () {
-                                deleteElement(index);
-                              },
-                              child: AnimatedContainer(
-                                height: 100,
-                                width: 50,
-                                decoration: const BoxDecoration(
-                                    color: Colors.red,
-                                    borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(20),
-                                        bottomLeft: Radius.circular(20.0))),
-                                duration: Duration(milliseconds: 300),
-                                child: const Icon(Icons.delete,
-                                    color: Colors.white, size: 30.0),
-                              ),
-                            )),
+                    Text(
+                      "Price Setup",
+                      style: headerText,
+                    ),
+                    Flexible(
+                        child: Align(
+                      alignment: Alignment.topRight,
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            resetAllVariables();
+                          });
+                        },
+                        child: Text(
+                          "Delete All",
+                          style: TextStyle(color: Colors.blue.shade700),
+                        ),
                       ),
-                    );
-                  },
+                    ))
+                  ],
                 ),
               ),
-            Align(
-              alignment: Alignment.center,
-              child: FloatingActionButton(
-                focusColor: Colors.blue.shade800,
-                backgroundColor: Colors.blue.shade800,
-                splashColor: Colors.blue.shade400,
-                onPressed: () {
-                  openDialog(context);
-                },
-                child: Icon(Icons.add),
+              if (peakList.isNotEmpty)
+                Container(
+                  child: ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    physics: ScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: peakList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Card(
+                        elevation: 10.0,
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 10.0, vertical: 20.0),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                              color: Color.fromRGBO(64, 75, 96, .9)),
+                          child: ListTile(
+                              selectedTileColor: Colors.blue,
+                              contentPadding: const EdgeInsets.only(left: 20.0),
+                              leading: Container(
+                                padding: const EdgeInsets.only(right: 12.0),
+                                decoration: new BoxDecoration(
+                                    border: new Border(
+                                        right: const BorderSide(
+                                            width: 1.0,
+                                            color: Colors.white24))),
+                                child: const Icon(Icons.timelapse,
+                                    color: Colors.white),
+                              ),
+                              title: InkWell(
+                                onTap: () {
+                                  editDialog(context, peakList[index], true);
+                                },
+                                child: Text(
+                                  peakList[index]['peakName'],
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              // subtitle: Text("Intermediate", style: TextStyle(color: Colors.white)),
+
+                              trailing: InkWell(
+                                onTap: () {
+                                  deleteElement(index);
+                                },
+                                child: AnimatedContainer(
+                                  height: 100,
+                                  width: 50,
+                                  decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(20),
+                                          bottomLeft: Radius.circular(20.0))),
+                                  duration: Duration(milliseconds: 300),
+                                  child: const Icon(Icons.delete,
+                                      color: Colors.white, size: 30.0),
+                                ),
+                              )),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              Align(
+                child: FloatingActionButton(
+                  focusColor: Colors.blue.shade800,
+                  backgroundColor: Colors.blue.shade800,
+                  splashColor: Colors.blue.shade400,
+                  onPressed: () {
+                    openDialog(context);
+                  },
+                  child: Icon(Icons.add),
+                ),
               ),
-            ),
-          ],
-        )),
+            ],
+          )),
+        ),
       ),
     );
   }

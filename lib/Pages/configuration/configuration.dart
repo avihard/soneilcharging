@@ -479,14 +479,14 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
           const SizedBox(
             height: 20,
           ),
-          chargeSettingRow("Voltage", voltValue.toString()),
+          /*chargeSettingRow("Voltage", voltValue.toString()),*/
           /* const Divider(
             height: 20,
             color: Colors.grey,
           ), */
-          const SizedBox(
+          /*const SizedBox(
             height: 20,
-          ),
+          ),*/
           // chargeSettingRow("Max Charge", maxCharging.toString()),
           SizedBox(
             height: 30,

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -246,6 +247,11 @@ String getStringFromHourAndMinutes(time, [isSign]) {
     return '${intl.NumberFormat('00').format(time.h)}$isSign${intl.NumberFormat('00').format(time.m)}';
   }
   return '${intl.NumberFormat('00').format(time.h)}:${intl.NumberFormat('00').format(time.m)}';
+}
+
+int getMinuteFromString(int hour, int minutes) {
+  var hourInMinutes = (hour * 60);
+  return hourInMinutes + minutes;
 }
 
 //////// END  ///////////////////

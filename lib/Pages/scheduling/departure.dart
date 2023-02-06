@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +7,9 @@ import '../../Animation/FunkyAnimation.dart';
 import '../../helpers/SnapSlider.dart';
 import '../../helpers/constant.dart';
 import '../../helpers/utils.dart';
+
+var fakeDataString =
+    '1005_0000_10;1710_0000_16:1100_0000_16;0700_0000_32;1101_0000_24;1901_0000_20:0200_0000_32;0700_0000_32;1101_0000_24;1901_0000_20:1200_0000_32;0700_0000_32;1101_0000_24;1901_0000_24:1000_0000_32;1300_0000_24;1350_0000_20;1415_0000_16;1525_0000_20:1400_0000_32;0700_0000_32;1101_0000_24;1901_0000_32:1500_0000_32';
 
 //saving into the local file of the device
 void saveScheduleTime(setTimes) {
@@ -15,9 +19,9 @@ void saveScheduleTime(setTimes) {
   tempSetTimes = setTimes
       .map((e) => {
             "id": e['id'],
-            //'selectedDays': e['selectedDays'],
+            'selectedDays': e['selectedDays'],
             'label': e['label'],
-            'date': e['date'],
+            //'date': e['date'],
             'maxHrs': e['maxHrs'],
             'current': e['current'],
             'time': DateTime(now.year, now.month, now.day, e['time'].hour,
@@ -65,8 +69,8 @@ class _departureWidgetState extends State<departureWidget>
     tempList = tempList
         .map((e) => {
               "id": e['id'],
-              //'selectedDays': e['selectedDays'],
-              'date': e['date'],
+              'selectedDays': e['selectedDays'],
+              //'date': e['date'],
               'label': e['label'],
               'maxHrs': e['maxHrs'],
               'current': e['current'],
@@ -89,8 +93,42 @@ class _departureWidgetState extends State<departureWidget>
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    // API call
+    createData();
+
     // read from file
-    readScheduleTime();
+    // readScheduleTime();
+  }
+
+  void createData() {
+    var dayArr = fakeDataString.split(":");
+    for (var i = 0; i < dayArr.length; i++) {
+      var dayInfoArr = dayArr[i].split(";");
+      for (var j = 0; j < dayInfoArr.length; j++) {
+        var infoArr = dayInfoArr[j].split("_");
+        setTimes.add({
+          'id': UniqueKey().hashCode,
+          'time': TimeOfDay(
+              hour: int.parse(infoArr[0].substring(0, 2)),
+              minute: int.parse(infoArr[0].substring(2, 4))),
+          'selectedDays': i,
+          'current': double.parse(infoArr[2]),
+          /*'maxHrs':  maxHrs.text.isNotEmpty
+                                  ? double.parse(maxHrs.text)
+                                  :  
+                                    10.0,*/
+
+          'label': "Departure",
+          //'timeZone': DateTime.now().timeZoneName
+        });
+      }
+    }
+    if (setTimes.length > 0) {
+      setState(() {
+        isAdded = false;
+      });
+    }
   }
 
   void clearDepartList() {
@@ -105,17 +143,25 @@ class _departureWidgetState extends State<departureWidget>
   String setScheduleTime() {
     var dayString = '';
     // convert day to day index
-    for (var index = 0; index < setTimes.length; index++) {
-      var minutes =
-          setTimes[index]['time'].hour * 60 + setTimes[index]['time'].minute;
-      for (var j = 0; j < setTimes[index]['selectedDays'].length; j++) {
-        if (setTimes[index]['selectedDays'][j]['values']) {
-          var dayScheduled =
-              j.toString() + "_" + minutes.toString() + "_" + "10";
+    for (var index = 0; index < 7; index++) {
+      var tempDayString = '';
+      dayString = index > 0 ? dayString + ":" : "";
+      List dayObj = setTimes
+          .where((element) => element['selectedDays'] == index)
+          .toList();
 
-          dayString +=
-              dayString.length != 0 ? ";" + dayScheduled : dayScheduled;
-        }
+      dayObj.sort(((a, b) {
+        var aTimeDouble = a['time'].hour + a['time'].minute / 60.0;
+        var bTimeDouble = b['time'].hour + b['time'].minute / 60.0;
+        return aTimeDouble.compareTo(bTimeDouble);
+      }));
+      for (final element in dayObj) {
+        var hourMinute = element['time'].hour.toString().padLeft(2, '0') +
+            element['time'].minute.toString().padLeft(2, '0');
+        tempDayString = tempDayString.isEmpty
+            ? "${hourMinute}_0000_${element['current'].toInt()}"
+            : ";${hourMinute}_0000_${element['current'].toInt()}";
+        dayString += tempDayString;
       }
     }
 
@@ -127,7 +173,7 @@ class _departureWidgetState extends State<departureWidget>
 
     var data = {
       'ScheduleTime': scheduleString,
-      'TimeZone': addedTime['timeZone']
+      //'TimeZone': addedTime['timeZone']
     };
 
     // API call here
@@ -137,10 +183,55 @@ class _departureWidgetState extends State<departureWidget>
     return dataString;
   }
 
-  void departList(addedTime) {
+  void departList(toSetTime) {
+    //var weekList = getWeekList(addedTime['selectedDays']);
     var isConflicting = false;
+    var tempTimes = [...setTimes];
+
+    for (var i = 0; i < toSetTime.length; i++) {
+      var dayObj = setTimes.where(
+          (element) => element['selectedDays'] == toSetTime[i]['selectedDays']);
+
+      if (dayObj.length == 0) {
+        tempTimes.add(toSetTime[i]);
+      } else {
+        for (final element in dayObj) {
+          //
+          if (!isConflicting) {
+            int toAddTime = getMinuteFromString(
+                toSetTime[i]['time'].hour, toSetTime[i]['time'].minute);
+
+            int addedTime = getMinuteFromString(
+                element['time'].hour, element['time'].minute);
+
+            if (toAddTime == addedTime ||
+                (addedTime - 30) < toAddTime && (addedTime + 30) > toAddTime) {
+              isConflicting = true;
+            }
+          }
+        }
+        if (!isConflicting) tempTimes.add(toSetTime[i]);
+      }
+    }
+
+    if (!isConflicting) {
+      setTimes = tempTimes;
+      setState(() {
+        isAdded = true;
+      });
+
+      // API call here
+      // create data in format
+      String dataString = createJsonData(toSetTime);
+
+      saveScheduleTime(setTimes);
+    } else {
+      showSnackBar(
+          context, "The time or surronding time has already been added.");
+    }
+
     // get all the elements of the same date which has been already scheduled previously.
-    var checkTimes = setTimes.where(
+    /* var checkTimes = setTimes.where(
       (element) {
         return element['date'] == addedTime['date'];
       },
@@ -160,20 +251,7 @@ class _departureWidgetState extends State<departureWidget>
         isConflicting = true;
         FunkyNotification(error: "Your time is in range with other time.");
       }
-    }
-
-    if (!isConflicting) {
-      setState(() {
-        isAdded = true;
-        setTimes.add(addedTime);
-      });
-
-      // API call here
-      // create data in format
-      //String dataString = createJsonData(addedTime);
-
-      saveScheduleTime(setTimes);
-    }
+    } */
   }
 
   void deleteElement(id) {
@@ -190,7 +268,7 @@ class _departureWidgetState extends State<departureWidget>
 
     // API call here
     // create data in format
-    // String dataString = createJsonData(addedTime);
+    String dataString = createJsonData(addedTime);
 
     saveScheduleTime(setTimes);
   }
@@ -277,7 +355,7 @@ class _departureWidgetState extends State<departureWidget>
 }
 
 class scheduleConfig extends StatefulWidget {
-  final Function(Map) notifyParent;
+  final Function(List) notifyParent;
   const scheduleConfig({Key? key, required this.notifyParent})
       : super(key: key);
 
@@ -292,9 +370,9 @@ class _scheduleConfigState extends State<scheduleConfig> {
   // max charging hr controller
   TextEditingController maxHrs = new TextEditingController(text: "10");
 
-  TextEditingController dateInput = TextEditingController();
+  // TextEditingController dateInput = TextEditingController();
 
-  Map<String, dynamic> currentTime = {};
+  List<Map<String, dynamic>> currentTime = [];
 
   Key sliderKey = const Key("scheduleKey");
   double _currvalue = 32.0;
@@ -398,7 +476,7 @@ class _scheduleConfigState extends State<scheduleConfig> {
                   ),
                 ),
               ),
-              Padding(
+              /* Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
                   controller: dateInput,
@@ -429,13 +507,13 @@ class _scheduleConfigState extends State<scheduleConfig> {
                     } else {}
                   },
                 ),
-              ),
-              /* Wrap(
+              ), */
+              Wrap(
                   alignment: WrapAlignment.center,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: <Widget>[
                     for (var elem in _selectedIndexs) weekCheckboxes(elem)
-                  ]), */
+                  ]),
               Padding(
                 padding: const EdgeInsets.only(left: 16.0, right: 16.0),
                 child: SnapSlider(
@@ -466,22 +544,31 @@ class _scheduleConfigState extends State<scheduleConfig> {
                 children: [
                   ElevatedButton(
                       onPressed: () => {
-                            // format the data and pass it to parent.
-                            currentTime.addAll({
-                              'id': UniqueKey().hashCode,
-                              'time': _time,
-                              'date': dateInput.text,
-                              //'selectedDays': _selectedIndexs,
-                              'maxHrs': /* maxHrs.text.isNotEmpty
+                            currentTime = [],
+                            // loop over selected Indexes and add
+                            for (var i = 0; i < _selectedIndexs.length; i++)
+                              {
+                                if (_selectedIndexs[i]['values'])
+                                  {
+                                    currentTime.add({
+                                      'id': UniqueKey().hashCode,
+                                      'time': _time,
+                                      'selectedDays': i,
+                                      'current': _currvalue,
+                                      /*'maxHrs':  maxHrs.text.isNotEmpty
                                   ? double.parse(maxHrs.text)
-                                  :  */
-                                  10.0,
-                              'current': _currvalue,
-                              'label': depLabel.text.isNotEmpty
-                                  ? depLabel.text
-                                  : "Departure",
-                              //'timeZone': DateTime.now().timeZoneName
-                            }),
+                                  :  
+                                    10.0,*/
+
+                                      'label': depLabel.text.isNotEmpty
+                                          ? depLabel.text
+                                          : "Departure",
+                                      //'timeZone': DateTime.now().timeZoneName
+                                    }),
+                                  }
+                              },
+                            // format the data and pass it to parent.
+
                             widget.notifyParent(currentTime)
                           },
                       child: const Text("Save"))
@@ -519,10 +606,51 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
   //TextEditingController maxHrs = new TextEditingController(text: );
   List<TextEditingController> textControllers = [];
 
+  List<List> _selectedIndexs = [];
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    _selectedIndexs = [];
+  }
+
+  void initalizeSelectedList(index, elemIndex) {
+    if (_selectedIndexs.length < (elemIndex + 1)) {
+      var weekList = [
+        {
+          "values": false,
+          "text": "Sun",
+        },
+        {
+          "values": false,
+          "text": "Mon",
+        },
+        {
+          "values": false,
+          "text": "Tue",
+        },
+        {
+          "values": false,
+          "text": "Wed",
+        },
+        {
+          "values": false,
+          "text": "Thur",
+        },
+        {
+          "values": false,
+          "text": "Fri",
+        },
+        {
+          "values": false,
+          "text": "Sat",
+        }
+      ];
+      weekList[index]['values'] = true;
+      _selectedIndexs.add(weekList);
+    }
   }
 
   Widget weekCheckboxes(elem) {
@@ -596,6 +724,7 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
               ),
               InkWell(
                 onTap: (() => {
+                      _selectedIndexs = [],
                       widget.notifyParent(),
                     }),
                 child: const Text("Clear All",
@@ -616,18 +745,27 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
             physics: const ScrollPhysics(),
             itemCount: widget.setTimes.length,
             itemBuilder: (BuildContext context, int index) {
+              initalizeSelectedList(
+                  widget.setTimes[index]['selectedDays'], index);
               textControllers.add(new TextEditingController(
                   text: widget.setTimes[index]['date'].toString()));
-              return ExpansionTile(
-                //initiallyExpanded: selected,
-                //key: GlobalKey(),
-                title: Text(widget.setTimes[index]['label']),
-                trailing: Text(widget.setTimes[index]['time'].format(context)),
-                onExpansionChanged: (value) {
-                  return value ? _selectTime(index) : null;
-                },
+              return Column(
                 children: [
-                  StatefulBuilder(builder: ((context, setState) {
+                  ExpansionTile(
+                    //initiallyExpanded: selected,
+                    //key: GlobalKey(),
+                    title: Text(daysMap.keys.firstWhere(
+                        (k) =>
+                            daysMap[k] ==
+                            widget.setTimes[index]['selectedDays'],
+                        orElse: () => "")),
+                    trailing:
+                        Text(widget.setTimes[index]['time'].format(context)),
+                    onExpansionChanged: (value) {
+                      return value ? _selectTime(index) : null;
+                    },
+                    children: [
+                      /* StatefulBuilder(builder: ((context, setState) {
                     return TextField(
                       controller: textControllers[index],
                       decoration: InputDecoration(
@@ -636,7 +774,7 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
                           ),
                       readOnly: true,
                       onTap: () async {
-                        /* DateTime? pickedDate = await showDatePicker(
+                         DateTime? pickedDate = await showDatePicker(
                             context: context,
                             initialDate: DateFormat("yyyy-MM-dd")
                                 .parse(textControllers[index].text),
@@ -654,65 +792,67 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
                           setState(() {
                             textControllers[index].text = formattedDate;
                           });
-                        } else {} */
+                        } else {} 
                       },
                     );
-                  })),
-                  /* Wrap(
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: <Widget>[
-                        for (var elem in widget.setTimes[index]['selectedDays'])
-                          weekCheckboxes(elem)
-                      ]), */
-                  const SizedBox(
-                    height: 5,
-                  ),
-                  SnapSlider(
-                      snapValues: {10, 16, 20, 24, 32},
-                      value: widget.setTimes[index]['current'],
-                      min: 10.0,
-                      max: 32.0,
-                      label: "Current",
-                      textColor: Colors.white,
-                      activeColor: Colors.white,
-                      isArrows: false,
-                      updateValue: (value) {
-                        setState(() {
-                          widget.setTimes[index]['current'] = value;
-                        });
-                      }),
-                  /* TextField(
+                  })), */
+                      Wrap(
+                          alignment: WrapAlignment.center,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: <Widget>[
+                            for (var elem in _selectedIndexs[index])
+                              weekCheckboxes(elem)
+                          ]),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      SnapSlider(
+                          snapValues: {10, 16, 20, 24, 32},
+                          value: widget.setTimes[index]['current'],
+                          min: 10.0,
+                          max: 32.0,
+                          label: "Current",
+                          textColor: Colors.white,
+                          activeColor: Colors.white,
+                          isArrows: false,
+                          updateValue: (value) {
+                            setState(() {
+                              widget.setTimes[index]['current'] = value;
+                            });
+                          }),
+                      /* TextField(
                     controller: textControllers[index],
                     decoration: const InputDecoration(
                       hintText: 'Max charging hours.',
                       labelText: 'Max Charge Hours',
                     ),
                   ), */
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          widget.setTimes[index]['date'] =
-                              textControllers[index].text;
-                          // here we will call API to save the data
-                          widget.saveElement(widget.setTimes[index]);
-                        },
-                        child: const Text("Save"),
+                      SizedBox(
+                        height: 20,
                       ),
-                      ElevatedButton(
-                        onPressed: () {
-                          widget.deleteElement(widget.setTimes[index]['id']);
-                        },
-                        child: const Text("Delete"),
-                      ),
-                    ],
-                  )
-                  /* Row(
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              widget.setTimes[index]['date'] =
+                                  textControllers[index].text;
+                              // here we will call API to save the data
+                              widget.saveElement(widget.setTimes[index]);
+                            },
+                            child: const Text("Save"),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              _selectedIndexs.removeAt(index);
+                              widget
+                                  .deleteElement(widget.setTimes[index]['id']);
+                            },
+                            child: const Text("Delete"),
+                          ),
+                        ],
+                      )
+                      /* Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -720,6 +860,12 @@ class _setDepartureWidgetState extends State<setDepartureWidget> {
                         onPressed: () => {}, child: const Text("Save"))
                   ],
                 ) */
+                    ],
+                  ),
+                  Divider(
+                    height: 10,
+                    thickness: 2,
+                  ),
                 ],
               );
             },

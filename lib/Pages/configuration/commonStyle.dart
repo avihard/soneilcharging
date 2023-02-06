@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:progressive_time_picker/progressive_time_picker.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:progressive_time_picker/progressive_time_picker.dart';
 
 ClockTimeFormat _clockTimeFormat = ClockTimeFormat.TWENTYFOURHOURS;
 final ClockIncrementTimeFormat _clockIncrementTimeFormat =
@@ -54,6 +54,11 @@ Widget timeWidget(String title, PickedTime time, [Icon? icon]) {
               fontWeight: FontWeight.bold,
             ),
           ),
+          /* Row(
+            children: [
+              TextFormField()
+            ],
+          ), */
           SizedBox(height: 5),
           Text(
             '$title',
