@@ -244,14 +244,19 @@ Widget showTime(time) {
 
 String getStringFromHourAndMinutes(time, [isSign]) {
   if (isSign != null) {
-    return '${intl.NumberFormat('00').format(time.h)}$isSign${intl.NumberFormat('00').format(time.m)}';
+    return '${intl.NumberFormat('00').format(time.hour)}$isSign${intl.NumberFormat('00').format(time.minute)}';
   }
-  return '${intl.NumberFormat('00').format(time.h)}:${intl.NumberFormat('00').format(time.m)}';
+  return '${intl.NumberFormat('00').format(time.hour)}:${intl.NumberFormat('00').format(time.minute)}';
 }
 
 int getMinuteFromString(int hour, int minutes) {
   var hourInMinutes = (hour * 60);
   return hourInMinutes + minutes;
+}
+
+String getHourFormatString(String hourMinute, [String symbol = ":"]) {
+  hourMinute = hourMinute.padLeft(4, '0');
+  return "${hourMinute.substring(0, 2)}$symbol${hourMinute.substring(2, 4)}";
 }
 
 //////// END  ///////////////////

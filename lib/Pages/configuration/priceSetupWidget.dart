@@ -3,11 +3,15 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:progressive_time_picker/progressive_time_picker.dart';
+import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 
 import 'package:soneilcharging/Pages/configuration/commonStyle.dart';
 import '../../helpers/constant.dart';
 import '../../helpers/inputStyleWidget.dart';
 import '../../helpers/utils.dart';
+
+String fakeDataString =
+    "0000_2359_7.4:0000_0659_7.4;0700_1100_15.1;1101_1500_10.2;1501_2359_7.4:0000_0659_7.4;0700_1100_15.1;1101_1900_10.2;1901_2359_7.4:0000_0659_7.4;0700_1100_15.1;1101_1900_10.2;1901_2359_7.4:0000_0659_7.4;0700_1100_15.1;1101_1900_10.2;1901_2359_7.4:0000_0659_7.0;0700_1100_15.0;1101_1510_10.1;1511_2359_7.3:0000_2359_7.4";
 
 class PriceSetupWidget extends StatefulWidget {
   const PriceSetupWidget({Key? key}) : super(key: key);
@@ -16,8 +20,11 @@ class PriceSetupWidget extends StatefulWidget {
   State<PriceSetupWidget> createState() => _PriceSetupWidgetState();
 }
 
-class _PriceSetupWidgetState extends State<PriceSetupWidget> {
+class _PriceSetupWidgetState extends State<PriceSetupWidget>
+    with SingleTickerProviderStateMixin {
   List? _selectedIndexs;
+
+  TabController? _tabController;
 
   ClockTimeFormat _clockTimeFormat = ClockTimeFormat.TWENTYFOURHOURS;
   final ClockIncrementTimeFormat _clockIncrementTimeFormat =
@@ -25,16 +32,15 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
 
   bool showForm = false;
 
+  String errorMsg = '';
+
   TextEditingController nameController = TextEditingController(text: "Peak");
   TextEditingController priceController = TextEditingController();
 
-  PickedTime _startTime = PickedTime(h: 0, m: 0);
-  PickedTime _endTime = PickedTime(h: 23, m: 59);
-
-  PickedTime _intervalBedTime = PickedTime(h: 0, m: 0);
-
-  PickedTime _disabledInitTime = PickedTime(h: 12, m: 0);
-  PickedTime _disabledEndTime = PickedTime(h: 20, m: 0);
+  DateTime startTimePicker = DateTime(
+      DateTime.now().year, DateTime.now().month, DateTime.now().day, 0, 0);
+  DateTime endTimePicker = DateTime(
+      DateTime.now().year, DateTime.now().month, DateTime.now().day, 23, 59);
 
   bool isAdded = false;
 
@@ -62,18 +68,48 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
     // TODO: implement initState
     super.initState();
 
-    _intervalBedTime = formatIntervalTime(
-      init: _startTime,
-      end: _endTime,
-      clockTimeFormat: _clockTimeFormat,
-      clockIncrementTimeFormat: _clockIncrementTimeFormat,
-    );
+    _tabController = new TabController(length: 2, vsync: this);
 
     resetWeekList();
+
+    populateData();
   }
 
   void updateState() {
     setState(() {});
+  }
+
+  void populateData() {
+    var dayArr = fakeDataString.split(":");
+    for (var i = 0; i < dayArr.length; i++) {
+      var dayInfoArr = dayArr[i].split(";");
+      for (var j = 0; j < dayInfoArr.length; j++) {
+        var dayInfo = dayInfoArr[j].split("_");
+        isAdded = true;
+        timeList[i]!['startArr']?.add(int.parse(dayInfo[0]));
+        timeList[i]!['endArr']?.add(int.parse(dayInfo[1]));
+        timeList[i]!['timeAddList']?.add({
+          "title": "Peak",
+          "startTime": int.parse(dayInfo[0]),
+          "endTime": int.parse(dayInfo[1]),
+          "price": double.parse(dayInfo[2])
+        });
+
+        peakList.add({
+          "peakName": "Peak",
+          "selectedDays": [i],
+          "startTime": getHourFormatString(dayInfo[0]),
+          "endTime": getHourFormatString(dayInfo[1]),
+          "startFractionTime":
+              double.parse(getHourFormatString(dayInfo[0], "")),
+          "endFractionTime": double.parse(getHourFormatString(dayInfo[1], "")),
+          "price": dayInfo[2],
+          "id": (startTimePicker.hour + endTimePicker.hour).toString() +
+              (1 * DateTime.now().hour * DateTime.now().day).toString(),
+        });
+      }
+    }
+    updateState();
   }
 
   void createSendString() {
@@ -91,7 +127,7 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
       for (int i = 0; i < value['timeAddList']!.length; i++) {
         var elementValue = value['timeAddList']![i];
         String valueToAdd =
-            "${elementValue['startTime']}_${elementValue['endTime']}_${elementValue['price']}_${elementValue['title']}";
+            "${elementValue['startTime'].toString().padLeft(4, '0')}_${elementValue['endTime'].toString().padLeft(4, '0')}_${elementValue['price']}_${elementValue['title']}";
         dayString +=
             i == value['timeAddList']!.length - 1 ? valueToAdd : "$valueToAdd;";
       }
@@ -113,6 +149,10 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
     peakList = [];
     showForm = false;
     isAdded = false;
+    startTimePicker = DateTime(
+        DateTime.now().year, DateTime.now().month, DateTime.now().day, 0, 0);
+    endTimePicker = DateTime(
+        DateTime.now().year, DateTime.now().month, DateTime.now().day, 23, 59);
     setState(() {});
   }
 
@@ -172,8 +212,8 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
       }
       for (int i = 0; i < value['startArr']!.length; i++) {
         var index = (i == value['startArr']!.length - 1) ? 0 : i + 1;
-        var startRounded = (value['startArr']![index] / 100).ceil();
-        var endRounded = (value['endArr']![i] / 100).ceil();
+        var startRounded = (value['startArr']![index] / 100).floor();
+        var endRounded = (value['endArr']![i] / 100).floor();
         var startPadded = value['startArr']![index].toString().padLeft(4, "0");
         var endPadded = value['endArr']![i].toString().padLeft(4, "0");
         if (!isShowGap) {
@@ -182,10 +222,8 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                 (startRounded - endRounded) == 0) {
               isShowGap = true;
               timesToAdd = {
-                "startTime":
-                    "${endPadded.substring(0, 2)}:${endPadded.substring(2, 4)}",
-                "endTime":
-                    "${startPadded.substring(0, 2)}:${startPadded.substring(2, 4)}",
+                "startTime": getHourFormatString(endPadded),
+                "endTime": getHourFormatString(startPadded),
                 "dayKey": key,
                 "dayName": daysMap.keys
                     .firstWhere((k) => daysMap[k] == key, orElse: () => "")
@@ -259,6 +297,25 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
   }
  */
 
+  // this is conflict checking function
+  bool validationChecks(currentHour, currentEnd, startArr, endArr, index) {
+    if (currentHour >= startArr[index] && currentHour <= endArr[index]) {
+      return true;
+    } else if (currentEnd >= startArr[index] && currentEnd <= endArr[index]) {
+      return true;
+    } else if (currentHour <= startArr[index] && currentEnd >= endArr[index]) {
+      return true;
+    } else if (currentHour > currentEnd) {
+      if (currentHour <= startArr[index] && endArr[index] <= 2359) {
+        return true;
+      } else if (0 <= startArr[index] && currentEnd >= endArr[index]) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
 // when endTime is less than starttime but greater than 24(means 0 to 24 next day) then add elements.
 
   // these function will do all the calculation of conflict and make list and data
@@ -269,8 +326,8 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
     List selectedDaysIndexes = [];
     Map<dynamic, Map<String, List>> funTimeList = {...timeList};
     // add next two lines to utils
-    int hourStart = int.parse(getStringFromHourAndMinutes(_startTime, ""));
-    int hourEnd = int.parse(getStringFromHourAndMinutes(_endTime, ""));
+    int hourStart = int.parse(getStringFromHourAndMinutes(startTimePicker, ""));
+    int hourEnd = int.parse(getStringFromHourAndMinutes(endTimePicker, ""));
     _selectedIndexs?.forEach((element) {
       if (showError) {
         return;
@@ -283,10 +340,15 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
           var endArrList = funTimeList[element['id']]!['endArr']!;
 
           for (var i = 0; i < startArrList.length; i++) {
-            if ((hourStart >= startArrList[i] && hourStart <= endArrList[i]) ||
-                (hourEnd >= startArrList[i] && hourEnd <= endArrList[i])) {
+            if (validationChecks(
+                hourStart, hourEnd, startArrList, endArrList, i)) {
+              var dayName = daysMap.keys.firstWhere(
+                  (k) => daysMap[k] == element['id'],
+                  orElse: () => "");
               isOverlapping = true;
               showError = true;
+              errorMsg =
+                  "Your time is conflicting on $dayName between ${getHourFormatString(startArrList[i].toString())} and ${getHourFormatString(endArrList[i].toString())}";
               break;
             }
           }
@@ -356,87 +418,71 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                       key: _formKey,
                       child: Column(
                         children: [
-                          carInfoBoxes("Name", nameController),
-                          TimePicker(
-                            initTime: _startTime,
-                            endTime: _endTime,
-                            height: 260.0,
-                            width: 260.0,
-                            primarySectors: _clockTimeFormat.value ~/ 2,
-                            secondarySectors: _clockTimeFormat.value ~/ 2,
-                            decoration: timePickerStyle(),
-                            onSelectionChange: (startTime, endTime,
-                                [isDisable]) {
-                              setState(() => {
-                                    _startTime = startTime,
-                                    _endTime = endTime,
-                                    _intervalBedTime = formatIntervalTime(
-                                      init: _startTime,
-                                      end: _endTime,
-                                      clockTimeFormat: _clockTimeFormat,
-                                      clockIncrementTimeFormat:
-                                          _clockIncrementTimeFormat,
-                                    ),
-                                  });
+                          //carInfoBoxes("Name", nameController),
+                          TextFormField(
+                            controller: priceController,
+                            textAlign: TextAlign.center,
+                            decoration: InputDecoration(
+                                hintText: "Add Price (in cents)",
+                                hintStyle: TextStyle(fontSize: 16)),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter some text.';
+                              }
+                              return null;
                             },
-                            onSelectionEnd: (startTime, endTime, [isDisable]) {
-                              _endTime = endTime.h == 24
-                                  ? PickedTime(h: 23, m: 59)
-                                  : endTime;
-                              _startTime = startTime.h == 24
-                                  ? PickedTime(h: 0, m: 0)
-                                  : startTime;
-                              setState(() => {});
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(62.0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 100,
-                                    child: TextFormField(
-                                      controller: priceController,
-                                      textAlign: TextAlign.center,
-                                      decoration: InputDecoration(
-                                          hintText: "Add Price (in cents)",
-                                          hintStyle: TextStyle(fontSize: 10)),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Please enter some text.';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  )
-                                ],
-                              ),
+                          ),
+                          SizedBox(
+                            height: 50,
+                            child: TabBar(
+                              controller: _tabController,
+                              tabs: [
+                                Tab(
+                                  text: "Start Time",
+                                ),
+                                Tab(
+                                  text: "End Time",
+                                ),
+                              ],
                             ),
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              timeWidget(
-                                'From',
-                                _startTime,
-                                /* Icon(
-                                Icons.power_settings_new_outlined,
-                                size: 25.0,
-                                color: Color(0xFF3CDAF7),
-                              ), */
-                              ),
-                              timeWidget(
-                                'To',
-                                _endTime,
-                                /* Icon(
-                                Icons.notifications_active_outlined,
-                                size: 25.0,
-                                color: Color(0xFF3CDAF7),
-                              ), */
-                              ),
-                            ],
+                          Container(
+                            height: 160,
+                            child: TabBarView(
+                              controller: _tabController,
+                              children: [
+                                TimePickerSpinner(
+                                  time: startTimePicker,
+                                  spacing: 50,
+                                  itemHeight: 50,
+                                  isForce2Digits: true,
+                                  normalTextStyle: TextStyle(
+                                      color: Colors.white, fontSize: 24),
+                                  highlightedTextStyle: TextStyle(
+                                      fontSize: 24,
+                                      color: Colors.blue.shade800),
+                                  onTimeChange: (time) {
+                                    setState(() => {startTimePicker = time});
+                                  },
+                                ),
+                                TimePickerSpinner(
+                                  time: endTimePicker,
+                                  spacing: 50,
+                                  itemHeight: 50,
+                                  isForce2Digits: true,
+                                  normalTextStyle: TextStyle(
+                                      color: Colors.white, fontSize: 24),
+                                  highlightedTextStyle: TextStyle(
+                                      fontSize: 24,
+                                      color: Colors.blue.shade800),
+                                  onTimeChange: (time) {
+                                    setState(() => {endTimePicker = time});
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
-                          if (isError) showError()
+                          if (isError) showError(errorMsg)
                           /* Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
@@ -489,16 +535,18 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                           peakList.add({
                             "peakName": nameController.text,
                             "selectedDays": returnList['selectedDaysIndexes'],
-                            "startTime":
-                                getStringFromHourAndMinutes(_startTime, ":"),
+                            "startTime": getStringFromHourAndMinutes(
+                                startTimePicker, ":"),
                             "endTime":
-                                getStringFromHourAndMinutes(_endTime, ":"),
+                                getStringFromHourAndMinutes(endTimePicker, ":"),
                             "startFractionTime": double.parse(
-                                getStringFromHourAndMinutes(_startTime, "")),
+                                getStringFromHourAndMinutes(
+                                    startTimePicker, "")),
                             "endFractionTime": double.parse(
-                                getStringFromHourAndMinutes(_endTime, "")),
+                                getStringFromHourAndMinutes(endTimePicker, "")),
                             "price": priceController.text,
-                            "id": (_startTime.h + _endTime.h).toString() +
+                            "id": (startTimePicker.hour + endTimePicker.hour)
+                                    .toString() +
                                 (returnList['selectedDaysIndexes'].length *
                                         DateTime.now().hour *
                                         DateTime.now().day)
@@ -591,7 +639,7 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                   ),
                 ]),
             content: Container(
-              height: 300.0, // Change as per your requirement
+              // Change as per your requirement
               width: 300.0, // Change as per your requirement
               child: Text(
                   "${"Please add time for " + gapMap['dayName'] + " between " + gapMap['startTime'] + " and " + gapMap['endTime']}."),
@@ -622,12 +670,17 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
     nameController = TextEditingController(text: timeCard['peakName']);
     priceController = TextEditingController(text: timeCard['price']);
     var startTimeArr = timeCard['startTime'].split(":");
-    _startTime = PickedTime(
-        h: int.parse(startTimeArr[0]), m: int.parse(startTimeArr[1]));
+    startTimePicker = DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
+        int.parse(startTimeArr[0]),
+        int.parse(startTimeArr[1]));
 
     var endTimeArr = timeCard['endTime'].split(":");
-    _endTime =
-        PickedTime(h: int.parse(endTimeArr[0]), m: int.parse(endTimeArr[1]));
+
+    endTimePicker = DateTime(DateTime.now().year, DateTime.now().month,
+        DateTime.now().day, int.parse(endTimeArr[0]), int.parse(endTimeArr[1]));
 
     return showDialog(
       context: context,
@@ -647,67 +700,32 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                       key: _formKey,
                       child: Column(
                         children: [
-                          carInfoBoxes("Name", nameController),
-                          TimePicker(
-                            initTime: _startTime,
-                            endTime: _endTime,
-                            height: 260.0,
-                            width: 260.0,
-                            primarySectors: _clockTimeFormat.value ~/ 2,
-                            secondarySectors: _clockTimeFormat.value ~/ 2,
-                            decoration: timePickerStyle(),
-                            onSelectionChange: (startTime, endTime,
-                                [isDisable]) {
-                              setState(() => {
-                                    _startTime = startTime,
-                                    _endTime = endTime,
-                                    _intervalBedTime = formatIntervalTime(
-                                      init: _startTime,
-                                      end: _endTime,
-                                      clockTimeFormat: _clockTimeFormat,
-                                      clockIncrementTimeFormat:
-                                          _clockIncrementTimeFormat,
-                                    ),
-                                  });
+                          //carInfoBoxes("Name", nameController),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          TextFormField(
+                            controller: priceController,
+                            textAlign: TextAlign.center,
+                            decoration: InputDecoration(
+                                hintText: "Add Price (in cents)",
+                                hintStyle: TextStyle(fontSize: 16)),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter some text.';
+                              }
+                              return null;
                             },
-                            onSelectionEnd: (startTime, endTime, [isDisable]) {
-                              setState(() => {
-                                    _startTime = startTime,
-                                    _endTime = endTime,
-                                  });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(62.0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 100,
-                                    child: TextFormField(
-                                      initialValue: timeCard['price'],
-                                      //controller: priceController,
-                                      textAlign: TextAlign.center,
-                                      decoration: InputDecoration(
-                                          hintText: "Add Price (in cents)",
-                                          hintStyle: TextStyle(fontSize: 10)),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Please enter some text.';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
                               timeWidget(
                                 'From',
-                                _startTime,
+                                startTimePicker,
                                 /* Icon(
                                 Icons.power_settings_new_outlined,
                                 size: 25.0,
@@ -716,7 +734,7 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                               ),
                               timeWidget(
                                 'To',
-                                _endTime,
+                                endTimePicker,
                                 /* Icon(
                                 Icons.notifications_active_outlined,
                                 size: 25.0,
@@ -725,7 +743,7 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                               ),
                             ],
                           ),
-                          if (isError) showError()
+                          if (isError) showError(errorMsg)
                           /* Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
@@ -779,14 +797,15 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                           var updatedObj = {
                             "peakName": nameController.text,
                             "selectedDays": returnList['selectedDaysIndexes'],
-                            "startTime":
-                                getStringFromHourAndMinutes(_startTime, ":"),
+                            "startTime": getStringFromHourAndMinutes(
+                                startTimePicker, ":"),
                             "endTime":
-                                getStringFromHourAndMinutes(_endTime, ":"),
+                                getStringFromHourAndMinutes(endTimePicker, ":"),
                             "startFractionTime": double.parse(
-                                getStringFromHourAndMinutes(_startTime, "")),
+                                getStringFromHourAndMinutes(
+                                    startTimePicker, "")),
                             "endFractionTime": double.parse(
-                                getStringFromHourAndMinutes(_endTime, "")),
+                                getStringFromHourAndMinutes(endTimePicker, "")),
                             "price": priceController.text,
                             "id": timeCard['id'],
                           };

@@ -10,7 +10,7 @@ timePickerStyle() {
   return TimePickerDecoration(
     baseColor: Color(0xFF1F2633),
     sweepDecoration: TimePickerSweepDecoration(
-      pickerStrokeWidth: 15.0,
+      pickerStrokeWidth: 30.0,
       pickerColor: Color(0xFF3CDAF7),
       showConnector: true,
     ),
@@ -35,7 +35,7 @@ timePickerStyle() {
   );
 }
 
-Widget timeWidget(String title, PickedTime time, [Icon? icon]) {
+Widget timeWidget(String title, DateTime time, [Icon? icon]) {
   return Container(
     width: 100.0,
     decoration: BoxDecoration(
@@ -47,7 +47,7 @@ Widget timeWidget(String title, PickedTime time, [Icon? icon]) {
       child: Column(
         children: [
           Text(
-            '${intl.NumberFormat('00').format(time.h)}:${intl.NumberFormat('00').format(time.m)}',
+            '${intl.NumberFormat('00').format(time.hour)}:${intl.NumberFormat('00').format(time.minute)}',
             style: TextStyle(
               color: Color.fromARGB(255, 70, 170, 190),
               fontSize: 16,
@@ -87,14 +87,14 @@ Widget titleWidget(title, [subTitle = '']) {
       ]);
 }
 
-Widget showError() {
+Widget showError(errorMsg) {
   return Column(
     children: [
       SizedBox(
         height: 10,
       ),
-      const Text(
-        "Time is Conflicting",
+      Text(
+        errorMsg,
         style: TextStyle(color: Colors.red),
       )
     ],

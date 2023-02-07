@@ -79,36 +79,12 @@ class myProfileWidget extends StatelessWidget {
             ),
             const Divider(
               thickness: 1,
-              height: 30,
+              height: 20,
               color: Colors.white,
             ),
             chargeSettingWidget(key: _myWidgetState),
             const SizedBox(
               height: 20,
-            ),
-            InkWell(
-              child: Container(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Price Setup",
-                        style: smallTexts,
-                      ),
-                      Icon(
-                        Icons.arrow_forward_ios_sharp,
-                        size: 16.0,
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              onTap: () => {
-                Navigator.of(context)
-                    .push(createRouteAnim(const PriceSetupWidget())),
-              },
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,

@@ -35,10 +35,13 @@ class addChargerMsgWidget extends StatelessWidget {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                'assets/images/evcharge.png',
-                width: 210,
-                height: 210,
+              CircleAvatar(
+                radius: 150,
+                child: Image.asset(
+                  'assets/images/evcharge.png',
+                  width: 210,
+                  height: 210,
+                ),
               ),
               const Text(
                   "Find your charger from the dropdown below, so you can access advanced features to control your charging.")

@@ -44,6 +44,7 @@ dependencies:
   imageview360: ^1.3.0
   path_provider: ^2.0.11
   progressive_time_picker: ^0.0.7
+  flutter_time_picker_spinner: ^2.0.0
 
 dev_dependencies:
   flutter_test:
