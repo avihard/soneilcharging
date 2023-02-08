@@ -4,6 +4,7 @@ import 'package:soneilcharging/Pages/scheduling/calculator.dart';
 
 import '../../helpers/constant.dart';
 import '../../helpers/utils.dart';
+import '../configuration/priceSetupWidget.dart';
 import 'departure.dart';
 import 'optimizeCharge.dart';
 
@@ -67,6 +68,30 @@ class timeSectionWidget extends StatelessWidget {
           onTap: () => {
             Navigator.of(context)
                 .push(createRouteAnim(const departureWidget())),
+          },
+        ),
+        InkWell(
+          child: Container(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Price Setup",
+                    style: smallTexts,
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios_sharp,
+                    size: 16.0,
+                  )
+                ],
+              ),
+            ),
+          ),
+          onTap: () => {
+            Navigator.of(context)
+                .push(createRouteAnim(const PriceSetupWidget())),
           },
         ),
         InkWell(

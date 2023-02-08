@@ -1,11 +1,17 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:progressive_time_picker/progressive_time_picker.dart';
-import 'package:intl/intl.dart' as intl;
+import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
+
+import 'package:soneilcharging/Pages/configuration/commonStyle.dart';
 import '../../helpers/constant.dart';
 import '../../helpers/inputStyleWidget.dart';
 import '../../helpers/utils.dart';
+
+String fakeDataString =
+    "0000_2359_7.4:0000_0659_7.4;0700_1100_15.1;1101_1500_10.2;1501_2359_7.4:0000_0659_7.4;0700_1100_15.1;1101_1900_10.2;1901_2359_7.4:0000_0659_7.4;0700_1100_15.1;1101_1900_10.2;1901_2359_7.4:0000_0659_7.4;0700_1100_15.1;1101_1900_10.2;1901_2359_7.4:0000_0659_7.0;0700_1100_15.0;1101_1510_10.1;1511_2359_7.3:0000_2359_7.4";
 
 class PriceSetupWidget extends StatefulWidget {
   const PriceSetupWidget({Key? key}) : super(key: key);
@@ -14,8 +20,11 @@ class PriceSetupWidget extends StatefulWidget {
   State<PriceSetupWidget> createState() => _PriceSetupWidgetState();
 }
 
-class _PriceSetupWidgetState extends State<PriceSetupWidget> {
+class _PriceSetupWidgetState extends State<PriceSetupWidget>
+    with SingleTickerProviderStateMixin {
   List? _selectedIndexs;
+
+  TabController? _tabController;
 
   ClockTimeFormat _clockTimeFormat = ClockTimeFormat.TWENTYFOURHOURS;
   final ClockIncrementTimeFormat _clockIncrementTimeFormat =
@@ -23,16 +32,15 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
 
   bool showForm = false;
 
+  String errorMsg = '';
+
   TextEditingController nameController = TextEditingController(text: "Peak");
   TextEditingController priceController = TextEditingController();
 
-  PickedTime _startTime = PickedTime(h: 0, m: 0);
-  PickedTime _endTime = PickedTime(h: 8, m: 0);
-
-  PickedTime _intervalBedTime = PickedTime(h: 0, m: 0);
-
-  PickedTime _disabledInitTime = PickedTime(h: 12, m: 0);
-  PickedTime _disabledEndTime = PickedTime(h: 20, m: 0);
+  DateTime startTimePicker = DateTime(
+      DateTime.now().year, DateTime.now().month, DateTime.now().day, 0, 0);
+  DateTime endTimePicker = DateTime(
+      DateTime.now().year, DateTime.now().month, DateTime.now().day, 23, 59);
 
   bool isAdded = false;
 
@@ -60,17 +68,51 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
     // TODO: implement initState
     super.initState();
 
-    _intervalBedTime = formatIntervalTime(
-      init: _startTime,
-      end: _endTime,
-      clockTimeFormat: _clockTimeFormat,
-      clockIncrementTimeFormat: _clockIncrementTimeFormat,
-    );
+    _tabController = new TabController(length: 2, vsync: this);
 
     resetWeekList();
+
+    populateData();
   }
 
   void updateState() {
+    setState(() {});
+  }
+
+  void populateData() {
+    var dayArr = fakeDataString.split(":");
+    for (var i = 0; i < dayArr.length; i++) {
+      var dayInfoArr = dayArr[i].split(";");
+      for (var j = 0; j < dayInfoArr.length; j++) {
+        var dayInfo = dayInfoArr[j].split("_");
+        isAdded = true;
+        timeList[i]!['startArr']?.add(int.parse(dayInfo[0]));
+        timeList[i]!['endArr']?.add(int.parse(dayInfo[1]));
+        timeList[i]!['timeAddList']?.add({
+          "title": "Peak",
+          "startTime": int.parse(dayInfo[0]),
+          "endTime": int.parse(dayInfo[1]),
+          "price": double.parse(dayInfo[2])
+        });
+
+        peakList.add({
+          "peakName": "Peak",
+          "selectedDays": [i],
+          "startTime": getHourFormatString(dayInfo[0]),
+          "endTime": getHourFormatString(dayInfo[1]),
+          "startFractionTime":
+              double.parse(getHourFormatString(dayInfo[0], "")),
+          "endFractionTime": double.parse(getHourFormatString(dayInfo[1], "")),
+          "price": dayInfo[2],
+          "id": (startTimePicker.hour + endTimePicker.hour).toString() +
+              (1 * DateTime.now().hour * DateTime.now().day).toString(),
+        });
+      }
+    }
+    updateState();
+  }
+
+  void createSendString() {
     // this block will create the data to send to API
     String priceDayString = '';
 
@@ -85,14 +127,12 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
       for (int i = 0; i < value['timeAddList']!.length; i++) {
         var elementValue = value['timeAddList']![i];
         String valueToAdd =
-            "${elementValue['startTime']}_${elementValue['endTime']}_${elementValue['price']}_${elementValue['title']}";
+            "${elementValue['startTime'].toString().padLeft(4, '0')}_${elementValue['endTime'].toString().padLeft(4, '0')}_${elementValue['price']}_${elementValue['title']}";
         dayString +=
             i == value['timeAddList']!.length - 1 ? valueToAdd : "$valueToAdd;";
       }
       priceDayString += key == 0 ? dayString : ":$dayString";
     });
-
-    setState(() {});
   }
 
   resetAllVariables() {
@@ -109,6 +149,11 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
     peakList = [];
     showForm = false;
     isAdded = false;
+    startTimePicker = DateTime(
+        DateTime.now().year, DateTime.now().month, DateTime.now().day, 0, 0);
+    endTimePicker = DateTime(
+        DateTime.now().year, DateTime.now().month, DateTime.now().day, 23, 59);
+    showSnackBar(context, "Data Deleted");
     setState(() {});
   }
 
@@ -125,8 +170,7 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
     ];
   }
 
-  void deleteElement(index) {
-    var element = peakList[index];
+  void removeElement(element) {
     for (int i = 0; i < element['selectedDays'].length; i++) {
       var id = element['selectedDays'][i];
       timeList[id]!['startArr']?.remove(element['startFractionTime']);
@@ -140,48 +184,73 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
             ?.removeWhere((timeElement) => timeElement['startTime'] == 0);
       }
     }
+  }
+
+  void deleteElement(index) {
+    var element = peakList[index];
+    removeElement(element);
 
     peakList.removeAt(index);
     peakList.isEmpty ? resetAllVariables() : setState(() {});
+    showSnackBar(context, "Data Deleted", Colors.green);
   }
 
   List calculateTimeGap() {
     bool isShowGap = false;
-    Map<dynamic, List> timesToAdd = {
-      0: [],
-      1: [],
-      2: [],
-      3: [],
-      4: [],
-      5: [],
-      6: []
-    };
+    Map<String, dynamic> timesToAdd = {};
     // we are checking if there is any gap between times
     timeList.forEach((key, value) {
       var missingTimeObj = {};
-      if (value['startArr']?.length == 0) {
+      if (value['startArr']?.length == 0 && !isShowGap) {
         isShowGap = true;
-        missingTimeObj = {
+        timesToAdd = {
           "startTime": "00:00",
           "endTime": "23:59",
           "dayKey": key,
           "dayName": daysMap.keys
               .firstWhere((k) => daysMap[k] == key, orElse: () => "")
         };
-        timesToAdd[key]?.add(missingTimeObj);
         return;
       }
       for (int i = 0; i < value['startArr']!.length; i++) {
         var index = (i == value['startArr']!.length - 1) ? 0 : i + 1;
-        var startRounded = (value['startArr']![index] / 100).ceil();
-        var endRounded = (value['endArr']![i] / 100).ceil();
+        var startRounded = (value['startArr']![index] / 100).floor();
+        var endRounded = (value['endArr']![i] / 100).floor();
         var startPadded = value['startArr']![index].toString().padLeft(4, "0");
         var endPadded = value['endArr']![i].toString().padLeft(4, "0");
-        if (index != 0) {
-          if ((value['startArr']![index] - value['endArr']![i]) > 1 &&
-              (startRounded - endRounded) == 0) {
+        if (!isShowGap) {
+          if (index != 0) {
+            if ((value['startArr']![index] - value['endArr']![i]) > 1 &&
+                (startRounded - endRounded) == 0) {
+              isShowGap = true;
+              timesToAdd = {
+                "startTime": getHourFormatString(endPadded),
+                "endTime": getHourFormatString(startPadded),
+                "dayKey": key,
+                "dayName": daysMap.keys
+                    .firstWhere((k) => daysMap[k] == key, orElse: () => "")
+              };
+              // timesToAdd[key]?.add(missingTimeObj);
+            }
+            // when the hour is next
+            if ((startRounded - endRounded) > 0 &&
+                (value['startArr']![index] - value['endArr']![i]) > 41) {
+              isShowGap = true;
+              timesToAdd = {
+                "startTime":
+                    "${endPadded.substring(0, 2)}:${endPadded.substring(2, 4)}",
+                "endTime":
+                    "${startPadded.substring(0, 2)}:${startPadded.substring(2, 4)}",
+                "dayKey": key,
+                "dayName": daysMap.keys
+                    .firstWhere((k) => daysMap[k] == key, orElse: () => "")
+              };
+              // timesToAdd[key]?.add(missingTimeObj);
+            }
+          } else if (index == 0 &&
+              (value['startArr']![index] - value['endArr']![i]) > -2359) {
             isShowGap = true;
-            missingTimeObj = {
+            timesToAdd = {
               "startTime":
                   "${endPadded.substring(0, 2)}:${endPadded.substring(2, 4)}",
               "endTime":
@@ -190,40 +259,11 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
               "dayName": daysMap.keys
                   .firstWhere((k) => daysMap[k] == key, orElse: () => "")
             };
-            timesToAdd[key]?.add(missingTimeObj);
+            // timesToAdd[key]?.add(missingTimeObj);
           }
-          // when the hour is next
-          if ((startRounded - endRounded) > 0 &&
-              (value['startArr']![index] - value['endArr']![i]) > 41) {
-            isShowGap = true;
-            missingTimeObj = {
-              "startTime":
-                  "${endPadded.substring(0, 2)}:${endPadded.substring(2, 4)}",
-              "endTime":
-                  "${startPadded.substring(0, 2)}:${startPadded.substring(2, 4)}",
-              "dayKey": key,
-              "dayName": daysMap.keys
-                  .firstWhere((k) => daysMap[k] == key, orElse: () => "")
-            };
-            timesToAdd[key]?.add(missingTimeObj);
-          }
-        } else if (index == 0 &&
-            (value['startArr']![index] - value['endArr']![i]) > -2359) {
-          isShowGap = true;
-          missingTimeObj = {
-            "startTime":
-                "${endPadded.substring(0, 2)}:${endPadded.substring(2, 4)}",
-            "endTime":
-                "${startPadded.substring(0, 2)}:${startPadded.substring(2, 4)}",
-            "dayKey": key,
-            "dayName": daysMap.keys
-                .firstWhere((k) => daysMap[k] == key, orElse: () => "")
-          };
-          timesToAdd[key]?.add(missingTimeObj);
         }
       }
     });
-    print("Aaaaa");
     return [isShowGap, timesToAdd];
   }
 
@@ -259,6 +299,25 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
   }
  */
 
+  // this is conflict checking function
+  bool validationChecks(currentHour, currentEnd, startArr, endArr, index) {
+    if (currentHour >= startArr[index] && currentHour <= endArr[index]) {
+      return true;
+    } else if (currentEnd >= startArr[index] && currentEnd <= endArr[index]) {
+      return true;
+    } else if (currentHour <= startArr[index] && currentEnd >= endArr[index]) {
+      return true;
+    } else if (currentHour > currentEnd) {
+      if (currentHour <= startArr[index] && endArr[index] <= 2359) {
+        return true;
+      } else if (0 <= startArr[index] && currentEnd >= endArr[index]) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
 // when endTime is less than starttime but greater than 24(means 0 to 24 next day) then add elements.
 
   // these function will do all the calculation of conflict and make list and data
@@ -269,8 +328,8 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
     List selectedDaysIndexes = [];
     Map<dynamic, Map<String, List>> funTimeList = {...timeList};
     // add next two lines to utils
-    int hourStart = int.parse(getStringFromHourAndMinutes(_startTime, ""));
-    int hourEnd = int.parse(getStringFromHourAndMinutes(_endTime, ""));
+    int hourStart = int.parse(getStringFromHourAndMinutes(startTimePicker, ""));
+    int hourEnd = int.parse(getStringFromHourAndMinutes(endTimePicker, ""));
     _selectedIndexs?.forEach((element) {
       if (showError) {
         return;
@@ -283,10 +342,15 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
           var endArrList = funTimeList[element['id']]!['endArr']!;
 
           for (var i = 0; i < startArrList.length; i++) {
-            if ((hourStart >= startArrList[i] && hourStart <= endArrList[i]) ||
-                (hourEnd >= startArrList[i] && hourEnd <= endArrList[i])) {
+            if (validationChecks(
+                hourStart, hourEnd, startArrList, endArrList, i)) {
+              var dayName = daysMap.keys.firstWhere(
+                  (k) => daysMap[k] == element['id'],
+                  orElse: () => "");
               isOverlapping = true;
               showError = true;
+              errorMsg =
+                  "Your time is conflicting on $dayName between ${getHourFormatString(startArrList[i].toString())} and ${getHourFormatString(endArrList[i].toString())}";
               break;
             }
           }
@@ -333,40 +397,6 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
     return showError ? null : returnMap;
   }
 
-  Widget _timeWidget(String title, PickedTime time, [Icon? icon]) {
-    return Container(
-      width: 100.0,
-      decoration: BoxDecoration(
-        color: Color(0xFF1F2633),
-        borderRadius: BorderRadius.circular(25.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            Text(
-              '${intl.NumberFormat('00').format(time.h)}:${intl.NumberFormat('00').format(time.m)}',
-              style: TextStyle(
-                color: Color.fromARGB(255, 70, 170, 190),
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 5),
-            Text(
-              '$title',
-              style: TextStyle(
-                color: Color(0xFF3CDAF7),
-                fontSize: 16,
-              ),
-            ),
-            // icon,
-          ],
-        ),
-      ),
-    );
-  }
-
   /* ################## ALL THE DIALOGUES START ########################*/
 
 // this opens the dialog for
@@ -379,16 +409,8 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
           return AlertDialog(
             scrollable: true,
             insetPadding: EdgeInsets.zero,
-            title: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Set your Prices"),
-                  const Text(
-                    "Enter price for every time phase.",
-                    style: TextStyle(fontSize: 12.0, color: Colors.grey),
-                  ),
-                ]),
+            title: titleWidget(
+                "Set your Prices!", "Enter price for every time phase."),
             content: Container(
               width: MediaQuery.of(context).size.width - 100,
               child: Column(
@@ -398,123 +420,71 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                       key: _formKey,
                       child: Column(
                         children: [
-                          carInfoBoxes("Name", nameController),
-                          TimePicker(
-                            initTime: _startTime,
-                            endTime: _endTime,
-                            height: 260.0,
-                            width: 260.0,
-                            primarySectors: _clockTimeFormat.value ~/ 2,
-                            secondarySectors: _clockTimeFormat.value ~/ 2,
-                            decoration: TimePickerDecoration(
-                              baseColor: Color(0xFF1F2633),
-                              sweepDecoration: TimePickerSweepDecoration(
-                                pickerStrokeWidth: 15.0,
-                                pickerColor: Color(0xFF3CDAF7),
-                                showConnector: true,
-                              ),
-                              initHandlerDecoration:
-                                  TimePickerHandlerDecoration(
-                                color: Color(0xFF141925),
-                                shape: BoxShape.circle,
-                                radius: 12.0,
-                              ),
-                              endHandlerDecoration: TimePickerHandlerDecoration(
-                                color: Color(0xFF141925),
-                                shape: BoxShape.circle,
-                                radius: 12.0,
-                              ),
-                              clockNumberDecoration:
-                                  TimePickerClockNumberDecoration(
-                                defaultTextColor: Colors.white,
-                                defaultFontSize: 12.0,
-                                scaleFactor: 1.0,
-                                showNumberIndicators: true,
-                                clockTimeFormat: _clockTimeFormat,
-                                clockIncrementTimeFormat:
-                                    _clockIncrementTimeFormat,
-                              ),
-                            ),
-                            onSelectionChange: (startTime, endTime,
-                                [isDisable]) {
-                              setState(() => {
-                                    _startTime = startTime,
-                                    _endTime = endTime,
-                                    _intervalBedTime = formatIntervalTime(
-                                      init: _startTime,
-                                      end: _endTime,
-                                      clockTimeFormat: _clockTimeFormat,
-                                      clockIncrementTimeFormat:
-                                          _clockIncrementTimeFormat,
-                                    ),
-                                  });
+                          //carInfoBoxes("Name", nameController),
+                          TextFormField(
+                            controller: priceController,
+                            textAlign: TextAlign.center,
+                            decoration: InputDecoration(
+                                hintText: "Add Price (in cents)",
+                                hintStyle: TextStyle(fontSize: 16)),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter some text.';
+                              }
+                              return null;
                             },
-                            onSelectionEnd: (startTime, endTime, [isDisable]) {
-                              setState(() => {
-                                    _startTime = startTime,
-                                    _endTime = endTime,
-                                  });
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(62.0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 100,
-                                    child: TextFormField(
-                                      controller: priceController,
-                                      textAlign: TextAlign.center,
-                                      decoration: InputDecoration(
-                                          hintText: "Add Price (in cents)",
-                                          hintStyle: TextStyle(fontSize: 10)),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Please enter some text.';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              _timeWidget(
-                                'From',
-                                _startTime,
-                                /* Icon(
-                                Icons.power_settings_new_outlined,
-                                size: 25.0,
-                                color: Color(0xFF3CDAF7),
-                              ), */
-                              ),
-                              _timeWidget(
-                                'To',
-                                _endTime,
-                                /* Icon(
-                                Icons.notifications_active_outlined,
-                                size: 25.0,
-                                color: Color(0xFF3CDAF7),
-                              ), */
-                              ),
-                            ],
-                          ),
-                          if (isError)
-                            Column(
-                              children: [
-                                SizedBox(
-                                  height: 10,
+                          SizedBox(
+                            height: 50,
+                            child: TabBar(
+                              controller: _tabController,
+                              tabs: [
+                                Tab(
+                                  text: "Start Time",
                                 ),
-                                const Text(
-                                  "Time is Conflicting",
-                                  style: TextStyle(color: Colors.red),
-                                )
+                                Tab(
+                                  text: "End Time",
+                                ),
                               ],
-                            )
+                            ),
+                          ),
+                          Container(
+                            height: 160,
+                            child: TabBarView(
+                              controller: _tabController,
+                              children: [
+                                TimePickerSpinner(
+                                  time: startTimePicker,
+                                  spacing: 50,
+                                  itemHeight: 50,
+                                  isForce2Digits: true,
+                                  normalTextStyle: TextStyle(
+                                      color: Colors.white, fontSize: 24),
+                                  highlightedTextStyle: TextStyle(
+                                      fontSize: 24,
+                                      color: Colors.blue.shade800),
+                                  onTimeChange: (time) {
+                                    setState(() => {startTimePicker = time});
+                                  },
+                                ),
+                                TimePickerSpinner(
+                                  time: endTimePicker,
+                                  spacing: 50,
+                                  itemHeight: 50,
+                                  isForce2Digits: true,
+                                  normalTextStyle: TextStyle(
+                                      color: Colors.white, fontSize: 24),
+                                  highlightedTextStyle: TextStyle(
+                                      fontSize: 24,
+                                      color: Colors.blue.shade800),
+                                  onTimeChange: (time) {
+                                    setState(() => {endTimePicker = time});
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (isError) showError(errorMsg)
                           /* Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
@@ -567,16 +537,18 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                           peakList.add({
                             "peakName": nameController.text,
                             "selectedDays": returnList['selectedDaysIndexes'],
-                            "startTime":
-                                getStringFromHourAndMinutes(_startTime, ":"),
+                            "startTime": getStringFromHourAndMinutes(
+                                startTimePicker, ":"),
                             "endTime":
-                                getStringFromHourAndMinutes(_endTime, ":"),
+                                getStringFromHourAndMinutes(endTimePicker, ":"),
                             "startFractionTime": double.parse(
-                                getStringFromHourAndMinutes(_startTime, "")),
+                                getStringFromHourAndMinutes(
+                                    startTimePicker, "")),
                             "endFractionTime": double.parse(
-                                getStringFromHourAndMinutes(_endTime, "")),
+                                getStringFromHourAndMinutes(endTimePicker, "")),
                             "price": priceController.text,
-                            "id": (_startTime.h + _endTime.h).toString() +
+                            "id": (startTimePicker.hour + endTimePicker.hour)
+                                    .toString() +
                                 (returnList['selectedDaysIndexes'].length *
                                         DateTime.now().hour *
                                         DateTime.now().day)
@@ -653,59 +625,32 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
     );
   }
 
-  Future gapShowDialog(context, gapList) {
+  Future gapShowDialog(context, gapMap) {
     return showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            scrollable: true,
-            insetPadding: EdgeInsets.zero,
             title: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Fill All Times"),
-                  const Text(
-                    "You have not yet set prices for this days and time.",
+                children: const [
+                  Text("Set Price!!"),
+                  Text(
+                    "You have not yet set prices for this day and time.",
                     style: TextStyle(fontSize: 12.0, color: Colors.grey),
                   ),
                 ]),
             content: Container(
-              height: 300.0, // Change as per your requirement
+              // Change as per your requirement
               width: 300.0, // Change as per your requirement
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: gapList.length,
-                itemBuilder: (BuildContext context, int index) {
-                  if (gapList[index].length > 0) {
-                    return ExpansionTile(
-                        //initiallyExpanded: selected,
-                        //key: GlobalKey(),
-                        title: Text(gapList[index][0]['dayName']),
-                        children: [
-                          for (int i = 0; i < gapList[index].length; i++)
-                            Row(
-                              children: [
-                                const Text("Between "),
-                                Text(gapList[index][i]['startTime']),
-                                Text(" - "),
-                                Text(gapList[index][i]['endTime']),
-                              ],
-                            ),
-                        ]);
-                  }
-                  return SizedBox.shrink();
-                },
-              ),
+              child: Text(
+                  "${"Please add time for " + gapMap['dayName'] + " between " + gapMap['startTime'] + " and " + gapMap['endTime']}."),
             ),
             actions: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(
-                    height: 10,
-                  ),
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
@@ -719,15 +664,183 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
         });
   }
 
+  // on edit this function removes the already present values in 'timeList' so that we can upgrade those items.
+
+  // this dialog opens up when you click on the container and it is used for editing the information.
+  Future nextEditDialog(context, timeCard) {
+    bool isError = false;
+    nameController = TextEditingController(text: timeCard['peakName']);
+    priceController = TextEditingController(text: timeCard['price']);
+    var startTimeArr = timeCard['startTime'].split(":");
+    startTimePicker = DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        DateTime.now().day,
+        int.parse(startTimeArr[0]),
+        int.parse(startTimeArr[1]));
+
+    var endTimeArr = timeCard['endTime'].split(":");
+
+    endTimePicker = DateTime(DateTime.now().year, DateTime.now().month,
+        DateTime.now().day, int.parse(endTimeArr[0]), int.parse(endTimeArr[1]));
+
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(builder: ((context, setState) {
+          return AlertDialog(
+            scrollable: true,
+            insetPadding: EdgeInsets.zero,
+            title: titleWidget(
+                "Set your Prices!", "Enter price for every time phase."),
+            content: Container(
+              width: MediaQuery.of(context).size.width - 100,
+              child: Column(
+                children: [
+                  //if (showForm)
+                  Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          //carInfoBoxes("Name", nameController),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          TextFormField(
+                            controller: priceController,
+                            textAlign: TextAlign.center,
+                            decoration: InputDecoration(
+                                hintText: "Add Price (in cents)",
+                                hintStyle: TextStyle(fontSize: 16)),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter some text.';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              timeWidget(
+                                'From',
+                                startTimePicker,
+                                /* Icon(
+                                Icons.power_settings_new_outlined,
+                                size: 25.0,
+                                color: Color(0xFF3CDAF7),
+                              ), */
+                              ),
+                              timeWidget(
+                                'To',
+                                endTimePicker,
+                                /* Icon(
+                                Icons.notifications_active_outlined,
+                                size: 25.0,
+                                color: Color(0xFF3CDAF7),
+                              ), */
+                              ),
+                            ],
+                          ),
+                          if (isError) showError(errorMsg)
+                          /* Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            ElevatedButton(
+                                onPressed: () {}, child: const Text("Add")),
+                            ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    showForm = false;
+                                  });
+                                },
+                                child: const Text("Cancel"))
+                          ],
+                        ) */
+                        ],
+                      )),
+                  /* if (!showForm)
+                    FloatingActionButton(
+                      onPressed: () {
+                        setState(() {
+                          showForm = true;
+                        });
+                      },
+                      child: Icon(Icons.add),
+                    ) */
+                ],
+              ),
+            ),
+            actions: [
+              //if (!showForm)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      editDialog(context, timeCard, false);
+                    },
+                    child: Text("Back"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        removeElement(timeCard);
+                        var returnList = calculateData();
+                        if (returnList != null) {
+                          timeList = returnList['timeList'];
+                          Navigator.of(context).pop();
+                          isError = false;
+                          isAdded = true;
+                          var updatedObj = {
+                            "peakName": nameController.text,
+                            "selectedDays": returnList['selectedDaysIndexes'],
+                            "startTime": getStringFromHourAndMinutes(
+                                startTimePicker, ":"),
+                            "endTime":
+                                getStringFromHourAndMinutes(endTimePicker, ":"),
+                            "startFractionTime": double.parse(
+                                getStringFromHourAndMinutes(
+                                    startTimePicker, "")),
+                            "endFractionTime": double.parse(
+                                getStringFromHourAndMinutes(endTimePicker, "")),
+                            "price": priceController.text,
+                            "id": timeCard['id'],
+                          };
+
+                          peakList[peakList.indexWhere((element) =>
+                              element['id'] == timeCard['id'])] = updatedObj;
+
+                          updateState();
+                        } else {
+                          setState(() => {isError = true});
+                        }
+                      }
+                    },
+                    child: Text("Submit"),
+                  )
+                ],
+              )
+            ],
+          );
+        }));
+      },
+    );
+  }
+
   // This is edit dialog lot of the code is common with new dialog so try to take out common part as much as possible
-  Future editDialog(context, selectedCard) {
-    for (int i = 0; i < selectedCard['selectedDays'].length; i++) {
-      _selectedIndexs?.forEach((element) {
-        if (element['id'] == selectedCard['selectedDays'][i]) {
-          element['values'] = true;
-        }
-      });
-    }
+  Future editDialog(context, selectedCard, [isUpdate]) {
+    _selectedIndexs?.forEach((element) {
+      if (selectedCard['selectedDays'].contains(element['id']) && isUpdate) {
+        element['values'] = true;
+      } else if (isUpdate) {
+        element['values'] = false;
+      }
+    });
     return showDialog(
       context: context,
       builder: (context) {
@@ -768,7 +881,7 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
                   onPressed: () {
                     _selectedIndexs = weekList;
                     Navigator.of(context).pop();
-                    nextDialog(context);
+                    nextEditDialog(context, selectedCard);
                   },
                   child: Text("Next"),
                 )
@@ -781,6 +894,86 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
   }
   /* ###################   END ##################### */
 
+  /* Show delete dialog */
+  Future showDeleteDialog(context, isAll, [index]) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text(
+              "Delete",
+              style: TextStyle(color: Colors.red),
+            ),
+            content: Container(
+                child: const Text("Are you sure you want to delete data?")),
+            actions: [
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("No"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      if (isAll) {
+                        setState(() {
+                          resetAllVariables();
+                        });
+                      } else {
+                        deleteElement(index);
+                      }
+
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("Yes"),
+                  ),
+                ],
+              )
+            ],
+          );
+        });
+  }
+  /* Show delete dialog */
+
+  /* Warning dialog start */
+  Future showWarningDialog(context) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text(
+              "Warning",
+              style: TextStyle(color: Colors.red),
+            ),
+            content: Container(
+                child: const Text(
+                    "Are you sure you want to go back? All your data will be lost.")),
+            actions: [
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("Back"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("Ok"),
+                  ),
+                ],
+              )
+            ],
+          );
+        });
+  }
+  /* Warning dialog End */
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -791,125 +984,137 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget> {
             List gapList = calculateTimeGap();
             if (gapList[0] == true) {
               gapShowDialog(context, gapList[1]);
-            } else {}
+            } else {
+              createSendString();
+            }
           },
           child: const Text("Save"),
           color: Colors.blue,
         ),
         //floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        body: SingleChildScrollView(
-            child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-              child: Row(
-                children: [
-                  InkWell(
-                    hoverColor: Colors.blue,
-                    focusColor: Colors.blue,
-                    child: const Icon(
-                      Icons.keyboard_arrow_left,
-                      size: 32,
-                    ),
-                    onTap: () => {Navigator.pop(context)},
-                  ),
-                  Text(
-                    "Price Setup",
-                    style: headerText,
-                  ),
-                  Flexible(
-                      child: Align(
-                    alignment: Alignment.topRight,
-                    child: InkWell(
+        body: Container(
+          height: MediaQuery.of(context).size.height - 100,
+          child: SingleChildScrollView(
+              child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+                child: Row(
+                  children: [
+                    InkWell(
+                      hoverColor: Colors.blue,
+                      focusColor: Colors.blue,
+                      child: const Icon(
+                        Icons.keyboard_arrow_left,
+                        size: 32,
+                      ),
                       onTap: () {
-                        setState(() {
-                          resetAllVariables();
-                        });
+                        List gapList = calculateTimeGap();
+                        if (gapList[0]) {
+                          showWarningDialog(context);
+                        } else {
+                          Navigator.pop(context);
+                        }
                       },
-                      child: Text(
-                        "Delete All",
-                        style: TextStyle(color: Colors.blue.shade700),
-                      ),
                     ),
-                  ))
-                ],
-              ),
-            ),
-            if (peakList.isNotEmpty)
-              Container(
-                child: ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  shrinkWrap: true,
-                  itemCount: peakList.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Card(
-                      elevation: 10.0,
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 10.0, vertical: 20.0),
-                      child: Container(
-                        decoration: const BoxDecoration(
-                            color: Color.fromRGBO(64, 75, 96, .9)),
-                        child: ListTile(
-                            selectedTileColor: Colors.blue,
-                            contentPadding: const EdgeInsets.only(left: 20.0),
-                            leading: Container(
-                              padding: const EdgeInsets.only(right: 12.0),
-                              decoration: new BoxDecoration(
-                                  border: new Border(
-                                      right: const BorderSide(
-                                          width: 1.0, color: Colors.white24))),
-                              child: const Icon(Icons.timelapse,
-                                  color: Colors.white),
-                            ),
-                            title: InkWell(
-                              onTap: () {
-                                editDialog(context, peakList[index]);
-                              },
-                              child: Text(
-                                peakList[index]['peakName'],
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            // subtitle: Text("Intermediate", style: TextStyle(color: Colors.white)),
-
-                            trailing: InkWell(
-                              onTap: () {
-                                deleteElement(index);
-                              },
-                              child: AnimatedContainer(
-                                height: 100,
-                                width: 50,
-                                decoration: const BoxDecoration(
-                                    color: Colors.red,
-                                    borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(20),
-                                        bottomLeft: Radius.circular(20.0))),
-                                duration: Duration(milliseconds: 300),
-                                child: const Icon(Icons.delete,
-                                    color: Colors.white, size: 30.0),
-                              ),
-                            )),
+                    Text(
+                      "Price Setup",
+                      style: headerText,
+                    ),
+                    Flexible(
+                        child: Align(
+                      alignment: Alignment.topRight,
+                      child: InkWell(
+                        onTap: () {
+                          showDeleteDialog(context, true);
+                        },
+                        child: Text(
+                          "Delete All",
+                          style: TextStyle(color: Colors.blue.shade700),
+                        ),
                       ),
-                    );
-                  },
+                    ))
+                  ],
                 ),
               ),
-            Align(
-              alignment: Alignment.center,
-              child: FloatingActionButton(
-                focusColor: Colors.blue.shade800,
-                backgroundColor: Colors.blue.shade800,
-                splashColor: Colors.blue.shade400,
-                onPressed: () {
-                  openDialog(context);
-                },
-                child: Icon(Icons.add),
+              if (peakList.isNotEmpty)
+                Container(
+                  child: ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    physics: ScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: peakList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Card(
+                        elevation: 10.0,
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 10.0, vertical: 20.0),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                              color: Color.fromRGBO(64, 75, 96, .9)),
+                          child: ListTile(
+                              selectedTileColor: Colors.blue,
+                              contentPadding: const EdgeInsets.only(left: 20.0),
+                              leading: Container(
+                                padding: const EdgeInsets.only(right: 12.0),
+                                decoration: new BoxDecoration(
+                                    border: new Border(
+                                        right: const BorderSide(
+                                            width: 1.0,
+                                            color: Colors.white24))),
+                                child: const Icon(Icons.timelapse,
+                                    color: Colors.white),
+                              ),
+                              title: InkWell(
+                                onTap: () {
+                                  editDialog(context, peakList[index], true);
+                                },
+                                child: Text(
+                                  peakList[index]['peakName'],
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              // subtitle: Text("Intermediate", style: TextStyle(color: Colors.white)),
+
+                              trailing: InkWell(
+                                onTap: () {
+                                  showDeleteDialog(context, false, index);
+                                  //deleteElement(index);
+                                },
+                                child: AnimatedContainer(
+                                  height: 100,
+                                  width: 50,
+                                  decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(20),
+                                          bottomLeft: Radius.circular(20.0))),
+                                  duration: Duration(milliseconds: 300),
+                                  child: const Icon(Icons.delete,
+                                      color: Colors.white, size: 30.0),
+                                ),
+                              )),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              Align(
+                child: FloatingActionButton(
+                  focusColor: Colors.blue.shade800,
+                  backgroundColor: Colors.blue.shade800,
+                  splashColor: Colors.blue.shade400,
+                  onPressed: () {
+                    openDialog(context);
+                  },
+                  child: Icon(Icons.add),
+                ),
               ),
-            ),
-          ],
-        )),
+            ],
+          )),
+        ),
       ),
     );
   }
