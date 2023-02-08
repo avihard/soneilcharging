@@ -153,6 +153,7 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget>
         DateTime.now().year, DateTime.now().month, DateTime.now().day, 0, 0);
     endTimePicker = DateTime(
         DateTime.now().year, DateTime.now().month, DateTime.now().day, 23, 59);
+    showSnackBar(context, "Data Deleted");
     setState(() {});
   }
 
@@ -191,6 +192,7 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget>
 
     peakList.removeAt(index);
     peakList.isEmpty ? resetAllVariables() : setState(() {});
+    showSnackBar(context, "Data Deleted", Colors.green);
   }
 
   List calculateTimeGap() {
@@ -892,6 +894,49 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget>
   }
   /* ###################   END ##################### */
 
+  /* Show delete dialog */
+  Future showDeleteDialog(context, isAll, [index]) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text(
+              "Delete",
+              style: TextStyle(color: Colors.red),
+            ),
+            content: Container(
+                child: const Text("Are you sure you want to delete data?")),
+            actions: [
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("No"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      if (isAll) {
+                        setState(() {
+                          resetAllVariables();
+                        });
+                      } else {
+                        deleteElement(index);
+                      }
+
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("Yes"),
+                  ),
+                ],
+              )
+            ],
+          );
+        });
+  }
+  /* Show delete dialog */
+
   /* Warning dialog start */
   Future showWarningDialog(context) {
     return showDialog(
@@ -981,9 +1026,7 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget>
                       alignment: Alignment.topRight,
                       child: InkWell(
                         onTap: () {
-                          setState(() {
-                            resetAllVariables();
-                          });
+                          showDeleteDialog(context, true);
                         },
                         child: Text(
                           "Delete All",
@@ -1037,7 +1080,8 @@ class _PriceSetupWidgetState extends State<PriceSetupWidget>
 
                               trailing: InkWell(
                                 onTap: () {
-                                  deleteElement(index);
+                                  showDeleteDialog(context, false, index);
+                                  //deleteElement(index);
                                 },
                                 child: AnimatedContainer(
                                   height: 100,

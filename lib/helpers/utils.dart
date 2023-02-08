@@ -311,13 +311,13 @@ Future<String> readCounter(fileName) async {
 /// END /////
 
 //// SnackBar Start /////
-showSnackBar(context, message) {
+showSnackBar(context, message, [color]) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: Text(
       message,
       style: smallTexts,
     ),
-    backgroundColor: Colors.blue,
+    backgroundColor: color ?? Colors.blue,
     dismissDirection: DismissDirection.down,
     elevation: 10,
   ));
