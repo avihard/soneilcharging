@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:soneilcharging/Pages/configuration/priceSetupWidget.dart';
+import 'package:soneilcharging/Pages/configuration/timeZoneSelection.dart';
 import '../../helpers/SnapSlider.dart';
 import '../../helpers/constant.dart';
 import '../../helpers/utils.dart';
@@ -112,6 +113,7 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
   late double currentValue;
   late int maxCharging;
   late double voltValue;
+  String timeZoneName = '';
 
   globalVars _myService = globalVars();
 
@@ -411,6 +413,41 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
     }
   }
 
+  Future<void> _navigateAndDisplaySelection(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const timeZoneSelection()),
+    );
+    timeZoneName = result['label'];
+    setState(() {});
+  }
+
+  Widget timeZoneDropDown() {
+    return GestureDetector(
+      onTap: () async {
+        _navigateAndDisplaySelection(context);
+      },
+      child: Container(
+        height: 50,
+        width: MediaQuery.of(context).size.width,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Time Zone',
+              style: tableTitle,
+            ),
+            Text(
+              timeZoneName.isEmpty ? '' : timeZoneName.substring(0, 25) + "...",
+              style: smallTexts,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -465,8 +502,9 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
           ),*/
           // chargeSettingRow("Max Charge", maxCharging.toString()),
           SizedBox(
-            height: 30,
+            height: 5,
           ),
+          timeZoneDropDown(),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:soneilcharging/Pages/record/records.dart';
 import 'package:soneilcharging/Pages/settings/addedVehiclesList.dart';
 import 'package:soneilcharging/Pages/settings/setTimingHours.dart';
 import '../../helpers/constant.dart';
@@ -315,6 +316,25 @@ class _DeviceSettingWidgetState extends State<DeviceSettingWidget> {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Set Charging Times',
+                    style: TextStyle(fontSize: 16.0),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 4, bottom: 8),
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).push(createRoute(Records()));
+              },
+              child: Container(
+                height: 20,
+                width: MediaQuery.of(context).size.width,
+                child: const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Charging records',
                     style: TextStyle(fontSize: 16.0),
                   ),
                 ),

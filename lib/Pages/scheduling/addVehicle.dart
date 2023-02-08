@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_swiper_null_safety/flutter_swiper_null_safety.dart';
 import 'package:imageview360/imageview360.dart';
-import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:soneilcharging/Authorization/forgotpassword.dart';
 import 'package:soneilcharging/helpers/utils.dart';
 
@@ -23,7 +23,7 @@ class _addVehicleState extends State<addVehicle> {
 
   var isLevel = 0;
   int selectedIndex = 0;
-  final scrollController = SwiperController();
+  final scrollController = SwiperControl();
   List<dynamic> carModels = [];
   List<dynamic> yearArr = [];
   String _carModel = '';
@@ -417,7 +417,7 @@ class _addVehicleState extends State<addVehicle> {
                       width: 200,
                       decoration: BoxDecoration(color: Colors.black45),
                       child: Swiper(
-                        controller: scrollController,
+                        control: scrollController,
                         viewportFraction: 0.5,
                         itemCount: brands.length,
                         scrollDirection: Axis.vertical,

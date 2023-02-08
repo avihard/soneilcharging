@@ -115,51 +115,55 @@ class _chargerInfoWidgetState extends State<chargerInfoWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Form(
-        child: Column(
-          children: [
-            showLabelandText("Charger Name", nameController),
-            SizedBox(
-              height: 20,
-            ),
-            showLabelandText("Charger Version", versionController),
-            SizedBox(
-              height: 10,
-            ),
-            showLabelandText("Maximum Charging rate", maxChargeController),
-            SizedBox(
-              height: 10,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.4,
-                  child: ElevatedButton(
-                      onPressed: () => {
-                            // API call here to save the data
-                            showSnackBar(context, "Profile Updated"),
-                            Navigator.of(context).pop()
-                          },
-                      child: const Text("Save")),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.4,
-                  child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          primary: Colors.transparent, // NEW
-                          visualDensity: VisualDensity.comfortable),
-                      onPressed: () => {Navigator.of(context).pop()},
-                      child: const Text(
-                        "Cancel",
-                        style: TextStyle(color: Colors.white),
-                      )),
-                ),
-              ],
-            )
-          ],
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          child: Column(
+            children: [
+              showLabelandText("Charger Name", nameController),
+              SizedBox(
+                height: 20,
+              ),
+              showLabelandText("Charger Version", versionController),
+              SizedBox(
+                height: 10,
+              ),
+              showLabelandText("Maximum Charging rate", maxChargeController),
+              SizedBox(
+                height: 30,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    height: 40,
+                    child: ElevatedButton(
+                        onPressed: () => {
+                              // API call here to save the data
+                              showSnackBar(context, "Profile Updated"),
+                              Navigator.of(context).pop()
+                            },
+                        child: const Text("Save")),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    height: 40,
+                    child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.black, // NEW
+                        ),
+                        onPressed: () => {Navigator.of(context).pop()},
+                        child: const Text(
+                          "Cancel",
+                          style: TextStyle(color: Colors.white),
+                        )),
+                  ),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );
