@@ -83,7 +83,7 @@ class _CalendarPopupViewState extends State<CalendarPopupView>
                             const BorderRadius.all(Radius.circular(24.0)),
                         boxShadow: <BoxShadow>[
                           BoxShadow(
-                            color: Colors.blue.shade800.withOpacity(0.8),
+                            color: Color.fromARGB(255, 13, 44, 78),
                             offset: const Offset(4, 4),
                           ),
                         ],
