@@ -54,9 +54,22 @@ class _RecordsState extends State<Records> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                "Charging History",
-                style: headerText,
+              Row(
+                children: [
+                  InkWell(
+                    hoverColor: Colors.blue,
+                    focusColor: Colors.blue,
+                    child: const Icon(
+                      Icons.keyboard_arrow_left,
+                      size: 32,
+                    ),
+                    onTap: () => {Navigator.pop(context)},
+                  ),
+                  Text(
+                    "Charging History",
+                    style: headerText,
+                  ),
+                ],
               ),
               const SizedBox(
                 height: 20,

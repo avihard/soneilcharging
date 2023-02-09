@@ -439,7 +439,7 @@ class _chargeSettingWidgetState extends State<chargeSettingWidget>
               style: tableTitle,
             ),
             Text(
-              timeZoneName.isEmpty ? '' : timeZoneName.substring(0, 25) + "...",
+              timeZoneName.isEmpty ? '' : timeZoneName.substring(0, 16) + "...",
               style: smallTexts,
             ),
           ],

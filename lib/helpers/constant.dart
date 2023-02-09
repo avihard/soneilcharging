@@ -56,6 +56,11 @@ TextStyle normalTexts =
     const TextStyle(color: Colors.white, fontSize: 20.0, fontFamily: 'Rubik');
 TextStyle smallTexts =
     const TextStyle(color: Colors.white, fontSize: 16.0, fontFamily: 'Rubik');
+TextStyle smallBoldText = const TextStyle(
+    color: Colors.white,
+    fontSize: 16.0,
+    fontWeight: FontWeight.bold,
+    fontFamily: 'Rubik');
 
 // setting page Texts
 TextStyle settingText = const TextStyle(

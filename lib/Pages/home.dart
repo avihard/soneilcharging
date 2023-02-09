@@ -38,7 +38,7 @@ const dynamic informationObject = [
     "unit": "*C",
     "icons": Icons.thermostat
   },
-  {"title": "Cycle", "value": 4, "unit": "", "icons": Icons.loop},
+  // {"title": "Cycle", "value": 4, "unit": "", "icons": Icons.loop},
   {"title": "Set Current", "value": 4, "unit": "A", "icons": Icons.volcano},
   {"title": "Power", "value": 4, "unit": "kw", "icons": Icons.power},
   {
@@ -175,20 +175,20 @@ class _HomeWidgetState extends State<HomeWidget> {
                   child: Column(
                     children: [
                       batteryWidget(snapshot: snapshot),
-                      SizedBox(
-                        height: 40,
-                      ),
+                      // SizedBox(
+                      //   height: 40,
+                      // ),
                       snapshot.data['Status'] == "Charging"
                           ? stopChargingButton()
                           : const Text(""),
                       snapshot.data['Status'] == "Paused"
                           ? resumeChargingButton()
                           : const Text(""),
+                      // priceandtimeWidget(),
                       informationWidget(
                           onButtonPressed: widget.onButtonPressed,
                           snapshot: snapshot),
                       // estimated time and price.
-                      priceandtimeWidget(),
                     ],
                   ),
                 );
@@ -219,7 +219,8 @@ class _batteryWidgetState extends State<batteryWidget> {
 
   late Timer timer;
   late StreamSubscription subscription;
-
+  bool toggle = false;
+  bool toggle2 = false;
   /* @override
   void initState() {
     super.initState();
@@ -257,9 +258,83 @@ class _batteryWidgetState extends State<batteryWidget> {
         ),
       );
 
+// manage the state later and change the flags according to live data
+  Widget stopChargingButton() {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          toggle2 = !toggle2;
+        });
+      },
+      child: Container(
+        height: 50,
+        width: 50,
+        decoration: BoxDecoration(
+            gradient: const SweepGradient(
+                center: FractionalOffset.bottomRight,
+                colors: <Color>[
+                  Colors.red,
+                  Colors.white,
+                  Colors.red,
+                ],
+                stops: [
+                  0.2,
+                  0.3,
+                  0.7
+                ]),
+            borderRadius: BorderRadius.all(Radius.circular(25))),
+        child: toggle2 ? Icon(Icons.lock) : Icon(Icons.lock_open),
+      ),
+    );
+    // return ElevatedButton(
+    //   style: ElevatedButton.styleFrom(
+    //     fixedSize: Size(200, 50),
+    //     primary: Colors.red.shade900,
+    //     elevation: 10,
+    //   ),
+    //   onPressed: () {
+    //     saveChargeStatus(1);
+    //   },
+    //   child: const Text(
+    //     'STOP CHARGING',
+    //     style: TextStyle(fontSize: 16),
+    //   ),
+    // );
+  }
+
+// manage the state later and change the flags according to live data
+  Widget resumeChargingButton() {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          toggle = !toggle;
+        });
+      },
+      child: Container(
+        height: 50,
+        width: 50,
+        decoration: const BoxDecoration(
+            gradient: const SweepGradient(
+                center: FractionalOffset.bottomRight,
+                colors: <Color>[
+                  Colors.green,
+                  Colors.white,
+                  Colors.green,
+                ],
+                stops: [
+                  0.2,
+                  0.3,
+                  0.7
+                ]),
+            borderRadius: BorderRadius.all(Radius.circular(25))),
+        child: toggle ? Icon(Icons.pause) : Icon(Icons.play_arrow),
+      ),
+    );
+  }
+
   Widget buildBatteryState(BatteryState batteryState) {
-    final style = TextStyle(fontSize: 32, color: Colors.white);
-    final double size = 300;
+    final style = TextStyle(fontSize: 25, color: Colors.white);
+    final double size = 250;
 
     switch (batteryState) {
       case BatteryState.full:
@@ -267,19 +342,29 @@ class _batteryWidgetState extends State<batteryWidget> {
 
         return Column(
           children: [
-            Stack(
-              children: [
-                Image.asset(
-                  "assets/images/evcharger.gif",
-                  height: 125.0,
-                  width: 125.0,
-                ),
-                /* Icon(Icons.battery_charging_full_rounded,
-                    size: size, color: color), */
-              ],
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Icon(Icons.electric_car_rounded, size: 75, color: color),
             ),
-            Text(widget.snapshot.data['Status'].toString(),
+            SizedBox(
+              height: 8,
+            ),
+
+            // change below widget while make app live right now it is hard coded.
+            Text(toggle ? "Charging" : "Pause",
                 style: style.copyWith(color: color)),
+            // Text(widget.snapshot.data['Status'].toString(),
+            //     style: style.copyWith(color: color)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width / 2,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [stopChargingButton(), resumeChargingButton()],
+                ),
+              ),
+            )
           ],
         );
       case BatteryState.charging:
@@ -339,6 +424,9 @@ class _batteryWidgetState extends State<batteryWidget> {
                       "EV Charger",
                       style: headerText,
                     ),
+                    SizedBox(
+                      height: 10,
+                    ),
                     InkWell(
                       child: buildBatteryState(batteryState),
                       onTap: () => {
@@ -349,13 +437,16 @@ class _batteryWidgetState extends State<batteryWidget> {
                         )
                       },
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 14),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         const Text("Range Added"),
                         buildBatteryLevel(batteryLevel),
                       ],
+                    ),
+                    SizedBox(
+                      height: 30,
                     )
                   ],
                 ),
@@ -364,7 +455,7 @@ class _batteryWidgetState extends State<batteryWidget> {
             Positioned(
               right: 0,
               left: 0,
-              bottom: -45,
+              bottom: -35,
               child: Container(
                 margin: const EdgeInsets.all(10),
                 padding: const EdgeInsets.only(top: 15),
@@ -386,7 +477,7 @@ class _batteryWidgetState extends State<batteryWidget> {
   }
 }
 
-// this widget shows information and other parameters about the charger.
+//this widget shows information and other parameters about the charger.
 class informationWidget extends StatefulWidget {
   final VoidCallback onButtonPressed;
   final AsyncSnapshot snapshot;
@@ -399,83 +490,146 @@ class informationWidget extends StatefulWidget {
 }
 
 class _informationWidgetState extends State<informationWidget> {
-  Swiper imageSlider(context) {
-    return new Swiper(
-      autoplay: true,
-      itemBuilder: (BuildContext context, int index) {
-        return InkWell(
-          onTap: widget.onButtonPressed,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.circular(10),
-              gradient: const SweepGradient(
-                  center: FractionalOffset.bottomRight,
-                  colors: <Color>[
-                    Colors.grey,
-                    Colors.black,
-                    Colors.grey,
-                  ],
-                  stops: [
-                    0.2,
-                    0.3,
-                    0.7
-                  ]),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  Text(
-                    informationObject[index]['title'].toString(),
-                    style: headerText,
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                        shape: BoxShape.circle, color: Colors.grey.shade300),
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 0),
-                      child: Icon(
-                        informationObject[index]['icons'],
-                        color: Colors.black,
+  Widget imageSlider(context) {
+    return GridView.count(
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.zero,
+        childAspectRatio: (7 / 4),
+        crossAxisCount: 2,
+        crossAxisSpacing: 25.0,
+        mainAxisSpacing: 8.0,
+        children: List.generate(informationObject.length, (index) {
+          return InkWell(
+              onTap: widget.onButtonPressed,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(10),
+                  gradient: const SweepGradient(
+                      center: FractionalOffset.bottomRight,
+                      colors: <Color>[
+                        Colors.grey,
+                        Colors.black,
+                        Colors.grey,
+                      ],
+                      stops: [
+                        0.2,
+                        0.3,
+                        0.7
+                      ]),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        informationObject[index]['title'].toString(),
+                        style: smallBoldText,
                       ),
-                    ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      Container(
+                        width: 34,
+                        height: 34,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey.shade300),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 0),
+                          child: Icon(
+                            informationObject[index]['icons'],
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      Text(
+                        widget.snapshot.data[informationObject[index]['title']]
+                                .toString() +
+                            " " +
+                            informationObject[index]['unit'].toString(),
+                        style: smallBoldText,
+                      ),
+                    ],
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Text(
-                    widget.snapshot.data[informationObject[index]['title']]
-                            .toString() +
-                        " " +
-                        informationObject[index]['unit'].toString(),
-                    style: headerText,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-      itemCount: 7,
-      viewportFraction: 0.7,
-      scale: 0.8,
-    );
+                ),
+              ));
+        }));
+    // return new Swiper(
+    //   autoplay: true,
+    //   itemBuilder: (BuildContext context, int index) {
+    //     return InkWell(
+    //       onTap: widget.onButtonPressed,
+    //       child: Container(
+    //         decoration: BoxDecoration(
+    //           color: Colors.black,
+    //           borderRadius: BorderRadius.circular(10),
+    //           gradient: const SweepGradient(
+    //               center: FractionalOffset.bottomRight,
+    //               colors: <Color>[
+    //                 Colors.grey,
+    //                 Colors.black,
+    //                 Colors.grey,
+    //               ],
+    //               stops: [
+    //                 0.2,
+    //                 0.3,
+    //                 0.7
+    //               ]),
+    //         ),
+    //         child: Padding(
+    //           padding: const EdgeInsets.all(16.0),
+    //           child: Column(
+    //             children: [
+    //               Text(
+    //                 informationObject[index]['title'].toString(),
+    //                 style: headerText,
+    //               ),
+    //               const SizedBox(
+    //                 height: 20,
+    //               ),
+    //               Container(
+    //                 width: 50,
+    //                 height: 50,
+    //                 decoration: BoxDecoration(
+    //                     shape: BoxShape.circle, color: Colors.grey.shade300),
+    //                 child: Padding(
+    //                   padding: const EdgeInsets.only(top: 0),
+    //                   child: Icon(
+    //                     informationObject[index]['icons'],
+    //                     color: Colors.black,
+    //                   ),
+    //                 ),
+    //               ),
+    //               const SizedBox(
+    //                 height: 20,
+    //               ),
+    //               Text(
+    //                 widget.snapshot.data[informationObject[index]['title']]
+    //                         .toString() +
+    //                     " " +
+    //                     informationObject[index]['unit'].toString(),
+    //                 style: headerText,
+    //               ),
+    //             ],
+    //           ),
+    //         ),
+    //       ),
+    //     );
+    //   },
+    //   itemCount: 7,
+    //   viewportFraction: 0.7,
+    //   scale: 0.8,
+    // );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        padding: EdgeInsets.all(10),
-        margin: EdgeInsets.all(5),
-        alignment: Alignment.center,
-        constraints: BoxConstraints.expand(height: 200),
-        child: imageSlider(context));
+    return Container(padding: EdgeInsets.all(10), child: imageSlider(context));
   }
 }
 

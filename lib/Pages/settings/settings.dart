@@ -334,7 +334,7 @@ class _DeviceSettingWidgetState extends State<DeviceSettingWidget> {
                 child: const Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    'Charging records',
+                    'Charging History',
                     style: TextStyle(fontSize: 16.0),
                   ),
                 ),

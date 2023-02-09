@@ -67,7 +67,7 @@ class _TimingHrsWidgetState extends State<TimingHrsWidget> {
                   ],
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text("Season:"),
                     DropdownButton(
@@ -87,7 +87,7 @@ class _TimingHrsWidgetState extends State<TimingHrsWidget> {
                   ],
                 ),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text("Select Charging Purpose:"),
                     DropdownButton(
@@ -112,6 +112,9 @@ class _TimingHrsWidgetState extends State<TimingHrsWidget> {
                 const Text(
                   "Time Chart (Mon - Fri)",
                   style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                  height: 20,
                 ),
                 for (var v in electricityPrice.values)
                   Padding(
